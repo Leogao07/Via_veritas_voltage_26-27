@@ -51,6 +51,9 @@ The terminal's Java selection can differ from the IDE's Gradle JDK.
 
 ## 4. Build and deploy
 
+For detailed USB connection, macOS and Windows terminal setup, wireless ADB,
+and first-run instructions, see the [VS Code robot deployment guide](VSCODE-ROBOT-DEPLOYMENT.md).
+
 In the IDE's Gradle tool window, run `TeamCode > Tasks > build > assembleDebug`.
 If that task is not shown, run the command from the repository root in the terminal:
 

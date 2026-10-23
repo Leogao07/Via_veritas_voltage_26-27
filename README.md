@@ -28,6 +28,11 @@ no extra Pinpoint library is required.
 
 ## Build and deploy
 
+Using VS Code? Follow the [step-by-step macOS and Windows robot deployment guide](docs/VSCODE-ROBOT-DEPLOYMENT.md)
+for local setup, USB or Wi-Fi connection, build/install commands, hardware
+configuration, first TeleOp run, and troubleshooting. It also explains how to
+move from Codespaces to a local computer for robot deployment.
+
 New teammates: follow the [Android Studio setup and collaboration guide](docs/ANDROID-STUDIO.md)
 for cloning, JDK/SDK configuration, building, deployment, and the shared Git workflow.
 
@@ -76,8 +81,23 @@ and robot checks, and [the upstream SDK README](docs/FTC-SDK-README.md) for rele
 | `plate` | Position servo |
 | `intakesensor` | goBILDA analog distance sensor at the intake; voltage output |
 | `outtakesensor` | goBILDA analog distance sensor at the outtake; voltage output |
+| `Flywheel` | Flywheel motor |
+| `elevator` | Elevator motor |
+| `Spoon` | Spoon servo |
+| `Camera_angle` | Camera angle servo |
+
+Use the exact spelling and capitalization shown above in the Robot Controller
+hardware configuration.
 
 The current OpMode preserves the existing Pinpoint pod configuration. If another OpMode supplies encoder resolution, offsets, or directions, bring its verified setup into this OpMode as appropriate for the actual robot.
+
+### Additional mechanism devices
+
+`Flywheel` and `elevator` are motors; `Spoon` and `Camera_angle` are servos.
+These names and device types are recorded for the hardware configuration.
+The current `TeleOP_v1.java` does not initialize or control these four devices.
+Their models, hub/port assignments, motor directions and power settings, servo
+ranges and starting positions, and driver controls have not been specified yet.
 
 ### Intake and outtake sensor signals
 
