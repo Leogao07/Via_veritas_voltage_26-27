@@ -116,8 +116,8 @@ These values describe the current code, not a hardware calibration. Tune setting
 Clone the repository after accepting a collaborator invitation:
 
 ```sh
-git clone https://github.com/Leogao07/Via_veritas_voltage.git
-cd Via_veritas_voltage
+git clone https://github.com/Leogao07/Via_veritas_voltage_26-27.git
+cd Via_veritas_voltage_26-27
 ```
 
 Start each task from an updated `main`, then create a new branch:
@@ -151,5 +151,5 @@ Use the current official manual and team updates when making game-specific decis
 - Initial Java import: checked against the supplied files.
 - English documentation: reviewed during repository setup.
 - FTC SDK 12.0.0 compilation and debug APK packaging: passed on October 23, 2026.
-- GitHub Actions APK build: [passed for commit `ec9cf0c`](https://github.com/Leogao07/Via_veritas_voltage/actions/runs/39948262006).
+- GitHub Actions APK build: [passed for commit `ec9cf0c`](https://github.com/Leogao07/Via_veritas_voltage_26-27/actions/runs/39948262006).
 - Robot testing: not performed as part of repository setup.

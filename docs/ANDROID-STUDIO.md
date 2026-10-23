@@ -16,7 +16,7 @@ alone does not grant repository access.
 1. Install Git and Android Studio with support for Android Gradle Plugin **8.13.2**.
 2. From Android Studio's welcome screen, choose **Get from VCS** or **Clone Repository**
    (the label depends on the IDE version), then enter:
-   `https://github.com/Leogao07/Via_veritas_voltage.git`.
+   `https://github.com/Leogao07/Via_veritas_voltage_26-27.git`.
 3. Authenticate with your invited GitHub account when prompted and clone the project.
 4. Open the repository root, containing `settings.gradle`, `gradlew`,
    `FtcRobotController/`, and `TeamCode/`.

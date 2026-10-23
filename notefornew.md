@@ -31,7 +31,7 @@ the technical reference for building the project, hardware names, and driver con
 In VS Code's Explorer, or Android Studio's **Project** view, expand these folders:
 
 ```text
-Via_veritas_voltage/
+Via_veritas_voltage_26-27/
 └── TeamCode/
     └── src/
         └── main/
