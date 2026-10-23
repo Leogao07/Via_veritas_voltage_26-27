@@ -16,13 +16,15 @@ Upstream: https://github.com/FIRST-Tech-Challenge/FtcRobotController/releases/ta
 
 | Path | Purpose |
 | --- | --- |
-| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/TeleOP_v1.java` | Team TeleOp: Pinpoint pose feedback, PD driving, intake, and plate presets. |
-| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Tele_debug_v1.java` | Compile-time settings and Driver Station diagnostics. |
+| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/TeleOP_v1.java` | Team TeleOp: Pinpoint pose feedback, PD driving, intake, and plate presets. |
+| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/Tele_debug_v1.java` | Compile-time settings and Driver Station diagnostics. |
 | `FtcRobotController/` | Official Robot Controller application library, resources, and disabled SDK examples. |
 | `gradlew`, `gradlew.bat`, `gradle/` | Gradle 9.1.0 wrapper. |
 
-The team Java files were moved from `src/` into `TeamCode` and given the package
-`org.firstinspires.ftc.teamcode`. Their control logic and tuning values are unchanged.
+The team's TeleOp program and tuning helper live together in the `teleop/`
+directory under `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/`, with
+the package `org.firstinspires.ftc.teamcode.teleop`. This folder organization
+preserves the control logic, tuning values, and Driver Station name `TeleOP_v1`.
 The SDK supplies the existing `com.qualcomm.hardware.gobilda.GoBildaPinpointDriver`;
 no extra Pinpoint library is required.
 

@@ -82,8 +82,11 @@ complete the [robot checks](SDK-INTEGRATION.md#before-robot-operation) on the ro
 ## 5. Work with teammates
 
 Team Java code lives in `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/`.
-Use the same package for new team classes. Edit `Tele_debug_v1.java` for tuning and
-`TeleOP_v1.java` for the existing TeleOp behavior.
+The current TeleOp files are in its `teleop/` subdirectory, using the package
+`org.firstinspires.ftc.teamcode.teleop`. Edit `teleop/Tele_debug_v1.java` for
+tuning and `teleop/TeleOP_v1.java` for the existing TeleOp behavior. Place new
+TeleOp classes in the same subpackage; keep other classes' package declarations
+consistent with their own source directories.
 
 Use Android Studio's Git tools or its terminal for the same branch workflow:
 

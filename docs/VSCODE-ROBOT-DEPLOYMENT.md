@@ -272,8 +272,10 @@ when you need internet access again.
 ## 7. Daily edit and deployment cycle
 
 1. Preserve local changes and synchronize the intended Git branch.
-2. Edit `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/TeleOP_v1.java`
-   for behavior, or `Tele_debug_v1.java` for tuning and diagnostic settings.
+2. Edit `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/TeleOP_v1.java`
+   for behavior, or `Tele_debug_v1.java` in that same `teleop/` directory for tuning
+   and diagnostic settings. Both files use the Java package
+   `org.firstinspires.ftc.teamcode.teleop`.
 3. Build, connect/check the intended ADB device, and install again.
 4. Reconnect Driver Station, select the OpMode, and test the change.
 5. Record what was built and actually tested. Follow [CONTRIBUTING.md](../CONTRIBUTING.md)

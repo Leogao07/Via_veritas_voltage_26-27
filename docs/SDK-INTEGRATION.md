@@ -18,9 +18,13 @@ are resolved from Maven during Gradle sync; they are not copied into source cont
 The public upstream debug keystore and OpMode annotation processor are included.
 No additional third-party robotics libraries are needed for the current team code.
 
-Team source migration adds only the package declaration
-`org.firstinspires.ftc.teamcode` and moves both files from `src/` into the
-standard TeamCode Java directory. Existing tuning and control behavior are retained.
+The team files were originally moved from `src/` into the standard TeamCode Java
+source tree during SDK integration. Both now live in
+`TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/` and use the package
+`org.firstinspires.ftc.teamcode.teleop`. The move into `teleop/` changes only their
+package declarations; tuning, control behavior, and the `TeleOP_v1` Driver Station
+name are retained. The Android module namespace remains
+`org.firstinspires.ftc.teamcode`.
 
 ## Build verification
 
@@ -30,6 +34,11 @@ Both team classes compiled against SDK 12.0.0, and the complete APK was generate
 `TeamCode/build/outputs/apk/debug/TeamCode-debug.apk` (approximately 49 MB).
 The source migration was also checked byte-for-byte against the previous Git
 revision, excluding the added package declaration.
+
+After moving both classes into `teleop/`, `:TeamCode:assembleDebug` passed again
+with JDK 21. A byte-for-byte comparison confirmed that only the Java package
+declarations changed; the remaining source content is identical. Robot testing
+was not performed for this directory reorganization.
 
 The build reports upstream Java 8 source/target and Gradle deprecation warnings.
 Native libraries were packaged without stripping debug symbols; this did not

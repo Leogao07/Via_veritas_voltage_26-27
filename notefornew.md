@@ -20,8 +20,8 @@ the technical reference for building the project, hardware names, and driver con
 | What you want to learn | Open this file | What you will find |
 | --- | --- | --- |
 | How to set up Android Studio | [docs/ANDROID-STUDIO.md](docs/ANDROID-STUDIO.md) | Accepting the invitation, cloning the project, configuring JDK/SDK, building, and deploying. |
-| What our robot program does | [TeleOP_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/TeleOP_v1.java) | The driver-controlled program: gamepad input, robot position feedback, drivetrain control, intake, and plate presets. |
-| Where settings and tuning live | [Tele_debug_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Tele_debug_v1.java) | Settings for mechanisms, speed commands, controller gains, motor directions, and diagnostic displays. |
+| What our robot program does | [TeleOP_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/TeleOP_v1.java) | The driver-controlled program: gamepad input, robot position feedback, drivetrain control, intake, and plate presets. |
+| Where settings and tuning live | [Tele_debug_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/Tele_debug_v1.java) | Settings for mechanisms, speed commands, controller gains, motor directions, and diagnostic displays. |
 | Which hardware names and buttons we use | [README.md](README.md) | Hardware configuration names, driver controls, build instructions, and verification status. |
 | How to share changes with teammates | [CONTRIBUTING.md](CONTRIBUTING.md) | Branches, commits, pull requests, reviews, and handling conflicts. |
 | What still needs checking on the robot | [docs/SDK-INTEGRATION.md](docs/SDK-INTEGRATION.md) | SDK details, build verification, robot checks, and known issues to follow up. |
@@ -40,14 +40,20 @@ Via_veritas_voltage_26-27/
                     └── firstinspires/
                         └── ftc/
                             └── teamcode/
-                                ├── TeleOP_v1.java
-                                ├── Tele_debug_v1.java
+                                ├── auto/
+                                ├── teleop/
+                                │   ├── TeleOP_v1.java
+                                │   └── Tele_debug_v1.java
                                 └── readme.md
 ```
 
 Some editors combine the folders into `org.firstinspires.ftc.teamcode`. That is
-the same location. You can also use your editor's file search and type
-`TeleOP_v1.java` or `Tele_debug_v1.java` to open them directly.
+the same location; expand `teleop` to find both Java files. Their package is
+`org.firstinspires.ftc.teamcode.teleop`. You can also use your editor's file search
+and type `TeleOP_v1.java` or `Tele_debug_v1.java` to open them directly.
+
+The `auto/` directory is reserved for future autonomous code and is currently
+empty. Git does not store empty directories, so it may be absent in a fresh clone.
 
 **TeleOP_v1** is the program you select in the Driver Station's TeleOp list.
 **Tele_debug_v1** is a helper that TeleOP_v1 uses for settings and display output;
@@ -55,7 +61,7 @@ it is not a separate program to select on the Driver Station.
 
 ## Read the code one piece at a time
 
-Start with the explanation at the top of [TeleOP_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/TeleOP_v1.java).
+Start with the explanation at the top of [TeleOP_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/TeleOP_v1.java).
 Then look for these names using your editor's text search:
 
 1. `hardwareMap.get`: connects the names in our program to devices configured on
@@ -66,7 +72,7 @@ Then look for these names using your editor's text search:
 5. `drive`: converts movement commands into power for the four drive motors.
 6. `stopDrive`: sets drive motor power to zero.
 
-In [Tele_debug_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Tele_debug_v1.java),
+In [Tele_debug_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/Tele_debug_v1.java),
 start with the plate and intake settings. Each section has comments explaining
 units, intended behavior, and tuning considerations. These settings take effect
 when you rebuild and run the program again.

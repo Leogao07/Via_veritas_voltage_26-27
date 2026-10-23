@@ -3,8 +3,13 @@
 Welcome!
 
 This module, TeamCode, is the place where you will write/paste the code for your team's
-robot controller App. This module contains `TeleOP_v1.java` and `Tele_debug_v1.java`.
-Build and deployment instructions are in the repository root README.md.
+robot controller App. The team's TeleOp program and tuning helper are
+[teleop/TeleOP_v1.java](teleop/TeleOP_v1.java) and
+[teleop/Tele_debug_v1.java](teleop/Tele_debug_v1.java), both using the Java package
+`org.firstinspires.ftc.teamcode.teleop`. The `auto/` directory is reserved for
+future autonomous code and remains empty; Git does not track empty directories.
+Build and deployment instructions are in the
+[repository root README.md](../../../../../../../../README.md).
 
 ## Creating your own OpModes
 
@@ -62,7 +67,10 @@ This is done inside Android Studio directly, using the following steps:
 
  3) Expand the  TeamCode/java folder
 
- 4) Right click on the org.firstinspires.ftc.teamcode folder and select "Paste"
+ 4) For a TeleOp, right click on the org.firstinspires.ftc.teamcode.teleop folder
+    and select "Paste". For a future autonomous OpMode, use the
+    org.firstinspires.ftc.teamcode.auto folder instead. Ensure the copied class's
+    package declaration matches the destination folder.
 
  5) You will be prompted for a class name for the copy.
     Choose something meaningful based on the purpose of this class.
@@ -83,6 +91,11 @@ The name that will appear on the driver station's "opmode list" is defined by th
  ``name="Template: Linear OpMode"``
 You can change what appears between the quotes to better describe your opmode.
 The "group=" portion of the code can be used to help organize your list of OpModes.
+
+Use `@TeleOp` for driver-controlled programs and `@Autonomous` for future autonomous
+programs, with the corresponding import. The annotation determines the Driver
+Station list; the directory name alone does not. The team's current TeleOp is
+still listed as `TeleOP_v1` after moving its files into `teleop/`.
 
 As shown, the current OpMode will NOT appear on the driver station's OpMode list because of the
   ``@Disabled`` annotation which has been included.

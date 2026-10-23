@@ -47,6 +47,9 @@ Record the FTC SDK version, build result, hardware configuration, test procedure
 Run `./gradlew :TeamCode:assembleDebug` from the repository root (Windows: `gradlew.bat`).
 Use JDK 21 and the Android SDK described in README.md. Team code lives in
 `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/`.
+The existing TeleOp and tuning helper are in its `teleop/` subdirectory and use
+the package `org.firstinspires.ftc.teamcode.teleop`. Keep the directory and Java
+package declaration consistent when adding or moving classes.
 Do not commit generated APKs, local SDK paths, or private signing credentials.
 
 ## Git authentication
