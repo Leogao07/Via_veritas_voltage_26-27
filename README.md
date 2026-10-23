@@ -74,8 +74,30 @@ and robot checks, and [the upstream SDK README](docs/FTC-SDK-README.md) for rele
 | `odometry` | goBILDA Pinpoint device |
 | `intake` | Intake motor |
 | `plate` | Position servo |
+| `intakesensor` | goBILDA analog distance sensor at the intake; voltage output |
+| `outtakesensor` | goBILDA analog distance sensor at the outtake; voltage output |
 
 The current OpMode preserves the existing Pinpoint pod configuration. If another OpMode supplies encoder resolution, offsets, or directions, bring its verified setup into this OpMode as appropriate for the actual robot.
+
+### Intake and outtake sensor signals
+
+The team reports that both sensors have been added to the Robot Controller
+hardware configuration using the exact names `intakesensor` and `outtakesensor`.
+Both are goBILDA analog distance sensors that report a voltage. The team's stated
+signal meanings apply to both sensors:
+
+| Reported voltage | Meaning |
+| --- | --- |
+| 0 V | No object detected |
+| 3 V | Object detected |
+
+These are the team's supplied detection states, not a voltage-to-distance
+calibration. The exact sensor models, hub/port assignments, and handling of
+intermediate voltages have not been recorded yet.
+
+The current `TeleOP_v1.java` does not read these sensors. This records the hardware
+setup for future development; sensor telemetry and mechanism automation remain to
+be implemented and tested.
 
 ### Current driver controls
 

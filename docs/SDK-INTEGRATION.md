@@ -44,6 +44,12 @@ A successful build verifies SDK compilation and APK packaging, not robot behavio
 
 - Configure `leftfront`, `leftback`, `rightfront`, `rightback`, `odometry`,
   `intake`, and `plate` with the correct device types in the Robot Controller.
+- The team reports that `intakesensor` and `outtakesensor` are already configured
+  as goBILDA analog distance sensors. Confirm that these exact names are retained
+  in the active configuration. The supplied signal meanings are 0 V for no object
+  detected and 3 V for an object detected; see the
+  [sensor signal notes](../README.md#intake-and-outtake-sensor-signals).
+  Sensor reading and automatic responses are not implemented in the current OpMode.
 - Verify Pinpoint pod resolution, offsets, and encoder directions after a cold
   power cycle. The team OpMode currently does not set these values explicitly.
 - Confirm wheel directions and odometry axes on the actual robot.
