@@ -36,7 +36,10 @@ If Git reports conflicts, edit the marked files, preserve the required behavior 
 
 Record the FTC SDK version, build result, hardware configuration, test procedure, and observed result. For tuning changes, include old and new values. Clearly identify anything that has not been tested.
 
-The repository has no standalone build task yet. Compile the files inside the team's complete FTC Android Studio project.
+Run `./gradlew :TeamCode:assembleDebug` from the repository root (Windows: `gradlew.bat`).
+Use JDK 21 and the Android SDK described in README.md. Team code lives in
+`TeamCode/src/main/java/org/firstinspires/ftc/teamcode/`.
+Do not commit generated APKs, local SDK paths, or private signing credentials.
 
 ## Git authentication
 

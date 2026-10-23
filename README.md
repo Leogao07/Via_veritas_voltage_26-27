@@ -4,25 +4,58 @@ Robot source code for the **2026-2027 FIRST Tech Challenge BIOBUZZ** season.
 
 This repository belongs to `Leogao07` and provides a shared starting point for robot programming, tuning, and code review. All project documentation, code comments, and authored driver-facing messages use English.
 
-## Current code
+## FTC Android Studio project
 
-| File | Purpose |
+This repository includes the official FTC Robot Controller **v12.0** project and
+FTC SDK **12.0.0** dependencies, pinned to upstream commit
+`e14c2aeb33e84d4ea21697beeea9ac49557be870`.
+Upstream: https://github.com/FIRST-Tech-Challenge/FtcRobotController/releases/tag/v12.0
+
+| Path | Purpose |
 | --- | --- |
-| `src/test1.java` | TeleOp with Pinpoint-based pose feedback, PD drive control, intake control, and plate presets. |
-| `src/DriveDebug.java` | Drive tuning, motor directions, mechanism controls, and Driver Station diagnostics. |
+| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/test1.java` | Team TeleOp: Pinpoint pose feedback, PD driving, intake, and plate presets. |
+| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/DriveDebug.java` | Compile-time settings and Driver Station diagnostics. |
+| `FtcRobotController/` | Official Robot Controller application library, resources, and disabled SDK examples. |
+| `gradlew`, `gradlew.bat`, `gradle/` | Gradle 9.1.0 wrapper. |
 
-The Java files were imported from the supplied working copies on October 22, 2026. Their control logic and tuning values have not been changed during repository setup.
+The team Java files were moved from `src/` into `TeamCode` and given the package
+`org.firstinspires.ftc.teamcode`. Their control logic and tuning values are unchanged.
+The SDK supplies the existing `com.qualcomm.hardware.gobilda.GoBildaPinpointDriver`;
+no extra Pinpoint library is required.
 
-**This is a source-only repository, not a complete FTC Android Studio project.** It does not yet include the FTC SDK, Gradle configuration, autonomous routines, or a verified robot build. Season labeling does not establish competition-rule compliance.
+## Build and deploy
 
-## Use in the team's FTC project
+1. Open this repository's root directory in Android Studio. Use a version supporting
+   Android Gradle Plugin **8.13.2** and select **JDK 21** as the Gradle JDK.
+2. Install Android SDK Platform **30**, Build Tools **35.0.0**, and Platform Tools
+   through SDK Manager. Allow Gradle sync to download the FTC dependencies.
+3. Let Android Studio create `local.properties` with your machine's SDK path, or set
+   `ANDROID_HOME`. Do not commit machine-specific paths.
+4. Build the `TeamCode` module. It produces the complete Robot Controller APK.
+5. Connect the robot controller using the team's USB/ADB deployment procedure,
+   select `TeamCode`, and run it on that device. Use a compatible Driver Station
+   from the same official SDK release.
+6. Match the hardware configuration below and verify behavior on the robot.
 
-1. Open the team's FTC Robot Controller project in Android Studio.
-2. Copy both Java files into the same source package in `TeamCode`.
-3. The supplied files have no `package` declaration. Add the same declaration to both files if required by the destination package, for example `package org.firstinspires.ftc.teamcode;`.
-4. Use an FTC SDK that provides `com.qualcomm.hardware.gobilda.GoBildaPinpointDriver`. Confirm compatibility with the team's installed SDK and hardware.
-5. Match the Robot Controller hardware configuration to the names below.
-6. Build the complete FTC project and verify behavior on the team's robot before treating the code as tested.
+Command-line build (Windows: use `gradlew.bat`):
+
+```sh
+./gradlew :TeamCode:assembleDebug
+```
+
+APK: `TeamCode/build/outputs/apk/debug/TeamCode-debug.apk`.
+With the intended robot controller connected and selected through ADB:
+
+```sh
+./gradlew :TeamCode:installDebug
+```
+
+The upstream public `libs/ftc.debug.keystore` is included because the official build
+requires it. It is a shared development key, not a private team signing credential.
+Do not commit private signing keys or passwords.
+
+See [SDK integration notes](docs/SDK-INTEGRATION.md) for provenance, verification,
+and robot checks, and [the upstream SDK README](docs/FTC-SDK-README.md) for release notes.
 
 ### Hardware configuration names
 
@@ -71,7 +104,7 @@ After editing and reviewing your changes:
 
 ```sh
 git diff
-git add src/DriveDebug.java src/test1.java
+git add TeamCode/src/main/java/org/firstinspires/ftc/teamcode
 git commit -m "Tune drive settings"
 git push -u origin leo/drive-tuning
 ```
@@ -89,5 +122,6 @@ Use the current official manual and team updates when making game-specific decis
 
 - Initial Java import: checked against the supplied files.
 - English documentation: reviewed during repository setup.
-- FTC SDK compilation: not yet performed; a complete FTC project is required.
+- FTC SDK 12.0.0 compilation and debug APK packaging: passed on October 23, 2026.
+- GitHub Actions build workflow: added; not yet run on GitHub.
 - Robot testing: not performed as part of repository setup.

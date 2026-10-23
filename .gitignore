@@ -13,3 +13,17 @@ local.properties
 .env
 .env.*
 !.env.example
+
+# Android-generated files
+*.aar
+!libs/*.aar
+*.dex
+*.hprof
+*.log
+.externalNativeBuild/
+.cxx/
+captures/
+out/
+
+# Official FTC public debug signing key (not a private team credential)
+!libs/ftc.debug.keystore
