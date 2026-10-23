@@ -15,13 +15,45 @@ Take your time, read a little at a time, and ask your teammates questions.
 This guide will help you find your way around. The main [README](README.md) remains
 the technical reference for building the project, hardware names, and driver controls.
 
+## Our two robot modes and their files
+
+We organize our robot programs into two modes:
+
+- **Auto (Autonomous):** the robot executes a programmed sequence after START.
+  Its source files live in `auto/`.
+- **TeleOp (Tele-Operated):** drivers operate the robot with gamepads.
+  Its source files live in `teleop/`.
+
+These two folders contain the team's current source files for each mode. Each
+mode has an execution file and a Debug settings file:
+
+- **Execution logic:** `auto_V1.java` and `TeleOP_v1.java` describe what the robot
+  does: hardware initialization, the order of actions, and control decisions.
+  TeleOp also reads gamepad inputs here.
+- **Settings and tuning:** `auto_debug_V1.java` and `Tele_debug_v1.java` hold the
+  adjustable values used by their execution files. As actions are implemented,
+  these may include speeds, distances, delays, servo targets, or controller gains.
+  The TeleOp helper also reports diagnostic information.
+
+The Debug files are Java helpers used by the execution files. They are not
+separate modes to select in Driver Station, and their settings are not changed
+live by editing the files. Stop the robot, edit a value, rebuild, install the
+updated app, and then test again.
+
+The Auto files currently provide a starting scaffold: `auto_V1` waits for START,
+reports completion, and finishes without commanding hardware. Its Debug helper
+currently sets only the telemetry update interval. The autonomous route and its
+motion settings will be added as the team develops them.
+
 ## Start with these files
 
 | What you want to learn | Open this file | What you will find |
 | --- | --- | --- |
 | How to set up Android Studio | [docs/ANDROID-STUDIO.md](docs/ANDROID-STUDIO.md) | Accepting the invitation, cloning the project, configuring JDK/SDK, building, and deploying. |
-| What our robot program does | [TeleOP_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/TeleOP_v1.java) | The driver-controlled program: gamepad input, robot position feedback, drivetrain control, intake, and plate presets. |
-| Where settings and tuning live | [Tele_debug_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/Tele_debug_v1.java) | Settings for mechanisms, speed commands, controller gains, motor directions, and diagnostic displays. |
+| Where autonomous execution logic lives | [auto_V1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/auto/auto_V1.java) | Auto entry point and the place for the programmed sequence; currently a scaffold without robot actions. |
+| Where autonomous settings and tuning live | [auto_debug_V1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/auto/auto_debug_V1.java) | Settings used by auto_V1; currently the telemetry update interval. |
+| What our driver-controlled program does | [TeleOP_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/TeleOP_v1.java) | TeleOp logic: gamepad input, robot position feedback, drivetrain control, intake, and plate presets. |
+| Where TeleOp settings and tuning live | [Tele_debug_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/Tele_debug_v1.java) | Settings for mechanisms, speed commands, controller gains, motor directions, and diagnostic displays. |
 | Which hardware names and buttons we use | [README.md](README.md) | Hardware configuration names, driver controls, build instructions, and verification status. |
 | How to share changes with teammates | [CONTRIBUTING.md](CONTRIBUTING.md) | Branches, commits, pull requests, reviews, and handling conflicts. |
 | What still needs checking on the robot | [docs/SDK-INTEGRATION.md](docs/SDK-INTEGRATION.md) | SDK details, build verification, robot checks, and known issues to follow up. |
@@ -41,6 +73,8 @@ Via_veritas_voltage_26-27/
                         └── ftc/
                             └── teamcode/
                                 ├── auto/
+                                │   ├── auto_V1.java
+                                │   └── auto_debug_V1.java
                                 ├── teleop/
                                 │   ├── TeleOP_v1.java
                                 │   └── Tele_debug_v1.java
@@ -48,16 +82,15 @@ Via_veritas_voltage_26-27/
 ```
 
 Some editors combine the folders into `org.firstinspires.ftc.teamcode`. That is
-the same location; expand `teleop` to find both Java files. Their package is
-`org.firstinspires.ftc.teamcode.teleop`. You can also use your editor's file search
-and type `TeleOP_v1.java` or `Tele_debug_v1.java` to open them directly.
+the same location; expand `auto` or `teleop` to find each pair of Java files.
+Their packages are `org.firstinspires.ftc.teamcode.auto` and
+`org.firstinspires.ftc.teamcode.teleop`, respectively. You can also use your
+editor's file search and type any of the four filenames to open it directly.
 
-The `auto/` directory is reserved for future autonomous code and is currently
-empty. Git does not store empty directories, so it may be absent in a fresh clone.
-
-**TeleOP_v1** is the program you select in the Driver Station's TeleOp list.
-**Tele_debug_v1** is a helper that TeleOP_v1 uses for settings and display output;
-it is not a separate program to select on the Driver Station.
+After building and installing the app, select **auto_V1** from Driver Station's
+Auto/Autonomous list or **TeleOP_v1** from its TeleOp list. The execution files
+use `@Autonomous` and `@TeleOp`, respectively, to choose their lists. Both Debug
+files are helpers and do not appear as selectable programs.
 
 ## Read the code one piece at a time
 
@@ -89,8 +122,13 @@ stores a named setting for the intake's forward motor power. The value is a powe
 command, not a measured speed. You can understand this setting before learning
 what every Java keyword means.
 
+For Auto, start with [auto_V1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/auto/auto_V1.java).
+Find `waitForStart()` and the place after it for future route actions. Then open
+[auto_debug_V1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/auto/auto_debug_V1.java)
+to see how the telemetry interval is kept separate from the execution logic.
+
 It is fine to leave the position-control math for later. First understand which
-file runs, where the settings live, and how a button reaches a mechanism.
+mode runs, which file describes its actions, and which file supplies its settings.
 
 ## What are the other project files?
 

@@ -18,13 +18,19 @@ are resolved from Maven during Gradle sync; they are not copied into source cont
 The public upstream debug keystore and OpMode annotation processor are included.
 No additional third-party robotics libraries are needed for the current team code.
 
-The team files were originally moved from `src/` into the standard TeamCode Java
+The TeleOp files were originally moved from `src/` into the standard TeamCode Java
 source tree during SDK integration. Both now live in
 `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/` and use the package
 `org.firstinspires.ftc.teamcode.teleop`. The move into `teleop/` changes only their
 package declarations; tuning, control behavior, and the `TeleOP_v1` Driver Station
 name are retained. The Android module namespace remains
 `org.firstinspires.ftc.teamcode`.
+
+The Auto execution scaffold (`auto_V1.java`) and settings helper
+(`auto_debug_V1.java`) live in the sibling `auto/` directory, using the package
+`org.firstinspires.ftc.teamcode.auto`. The scaffold uses `@Autonomous` to appear
+in Driver Station's Auto list, waits for START, and completes without commanding
+hardware. Route actions have not been implemented.
 
 ## Build verification
 
@@ -39,6 +45,10 @@ After moving both classes into `teleop/`, `:TeamCode:assembleDebug` passed again
 with JDK 21. A byte-for-byte comparison confirmed that only the Java package
 declarations changed; the remaining source content is identical. Robot testing
 was not performed for this directory reorganization.
+
+The addition of `auto_V1.java` and `auto_debug_V1.java` also passed
+`:TeamCode:assembleDebug` with JDK 21 and the same SDK dependencies. The Auto
+scaffold has not been deployed or tested on the robot.
 
 The build reports upstream Java 8 source/target and Gradle deprecation warnings.
 Native libraries were packaged without stripping debug symbols; this did not

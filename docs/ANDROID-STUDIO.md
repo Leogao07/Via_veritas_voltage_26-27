@@ -88,6 +88,12 @@ tuning and `teleop/TeleOP_v1.java` for the existing TeleOp behavior. Place new
 TeleOp classes in the same subpackage; keep other classes' package declarations
 consistent with their own source directories.
 
+Auto code lives alongside it in `auto/`, using
+`org.firstinspires.ftc.teamcode.auto`. Edit `auto/auto_V1.java` for autonomous
+execution logic and `auto/auto_debug_V1.java` for its settings. The current Auto
+program is a scaffold without robot actions. Once built and installed, select
+`auto_V1` in Driver Station's Auto list; neither Debug helper is a separate OpMode.
+
 Use Android Studio's Git tools or its terminal for the same branch workflow:
 
 1. Preserve unfinished changes before switching branches. Switch to `main` and

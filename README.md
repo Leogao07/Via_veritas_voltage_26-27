@@ -16,6 +16,8 @@ Upstream: https://github.com/FIRST-Tech-Challenge/FtcRobotController/releases/ta
 
 | Path | Purpose |
 | --- | --- |
+| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/auto/auto_V1.java` | Auto execution scaffold; no autonomous route actions yet. |
+| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/auto/auto_debug_V1.java` | Auto compile-time settings; currently the telemetry update interval. |
 | `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/TeleOP_v1.java` | Team TeleOp: Pinpoint pose feedback, PD driving, intake, and plate presets. |
 | `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/Tele_debug_v1.java` | Compile-time settings and Driver Station diagnostics. |
 | `FtcRobotController/` | Official Robot Controller application library, resources, and disabled SDK examples. |
@@ -25,6 +27,15 @@ The team's TeleOp program and tuning helper live together in the `teleop/`
 directory under `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/`, with
 the package `org.firstinspires.ftc.teamcode.teleop`. This folder organization
 preserves the control logic, tuning values, and Driver Station name `TeleOP_v1`.
+
+The `auto/` directory contains the Auto program and its tuning helper, using the
+package `org.firstinspires.ftc.teamcode.auto`. The execution files contain control
+logic; each mode's Debug helper supplies its adjustable settings. After building
+and installing the app, `auto_V1` appears in Driver Station's Auto list. It is a
+starting scaffold that waits for START, reports completion, and exits without
+commanding hardware. See the [new team member guide](notefornew.md#our-two-robot-modes-and-their-files)
+for the two-mode file map.
+
 The SDK supplies the existing `com.qualcomm.hardware.gobilda.GoBildaPinpointDriver`;
 no extra Pinpoint library is required.
 

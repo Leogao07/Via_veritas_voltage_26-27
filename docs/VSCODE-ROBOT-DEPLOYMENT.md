@@ -235,6 +235,13 @@ These preset values are code settings, not verified mechanical calibration. Buil
 success does not establish correct robot behavior. Existing tuning concerns and
 robot test status are recorded in [SDK integration notes](SDK-INTEGRATION.md).
 
+For Auto, select `auto_V1` from the Auto/Autonomous list instead. The same build
+and installation commands include both modes. The current Auto program waits for
+START, reports completion, and exits without commanding hardware. Develop its
+sequence in `auto/auto_V1.java` and its adjustable settings in
+`auto/auto_debug_V1.java`, alongside `teleop/` under the team Java directory.
+The two Debug helpers are not separate programs in Driver Station.
+
 ## 6. Optional: deploy over Control Hub Wi-Fi
 
 Establish USB deployment first. Download dependencies and complete an initial
