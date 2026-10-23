@@ -4,6 +4,9 @@ Robot source code for the **2026-2027 FIRST Tech Challenge BIOBUZZ** season.
 
 This repository belongs to `Leogao07` and provides a shared starting point for robot programming, tuning, and code review. All project documentation, code comments, and authored driver-facing messages use English.
 
+New to the team or to programming? Start with [A Note for New Team Members](notefornew.md)
+for a welcome, a file map, and a suggested reading order.
+
 ## FTC Android Studio project
 
 This repository includes the official FTC Robot Controller **v12.0** project and
@@ -13,8 +16,8 @@ Upstream: https://github.com/FIRST-Tech-Challenge/FtcRobotController/releases/ta
 
 | Path | Purpose |
 | --- | --- |
-| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/test1.java` | Team TeleOp: Pinpoint pose feedback, PD driving, intake, and plate presets. |
-| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/DriveDebug.java` | Compile-time settings and Driver Station diagnostics. |
+| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/TeleOP_v1.java` | Team TeleOp: Pinpoint pose feedback, PD driving, intake, and plate presets. |
+| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/Tele_debug_v1.java` | Compile-time settings and Driver Station diagnostics. |
 | `FtcRobotController/` | Official Robot Controller application library, resources, and disabled SDK examples. |
 | `gradlew`, `gradlew.bat`, `gradle/` | Gradle 9.1.0 wrapper. |
 
@@ -84,7 +87,7 @@ The current OpMode preserves the existing Pinpoint pod configuration. If another
 | Gamepad 2 Y / X / A / B | Select plate targets of 27 / 117 / 207 / 297 degrees. |
 | Gamepad 2 left / right bumper | Run the intake forward / reverse; release to stop. Forward takes priority if both are held. |
 
-These values describe the current code, not a hardware calibration. Tune settings in `DriveDebug.java`. Releasing the drive bumper resets the translation target and preserves the heading target.
+These values describe the current code, not a hardware calibration. Tune settings in `Tele_debug_v1.java`. Releasing the drive bumper resets the translation target and preserves the heading target.
 
 ## Work with the team
 

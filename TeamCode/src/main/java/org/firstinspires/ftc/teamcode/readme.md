@@ -3,7 +3,7 @@
 Welcome!
 
 This module, TeamCode, is the place where you will write/paste the code for your team's
-robot controller App. This module contains `test1.java` and `DriveDebug.java`.
+robot controller App. This module contains `TeleOP_v1.java` and `Tele_debug_v1.java`.
 Build and deployment instructions are in the repository root README.md.
 
 ## Creating your own OpModes

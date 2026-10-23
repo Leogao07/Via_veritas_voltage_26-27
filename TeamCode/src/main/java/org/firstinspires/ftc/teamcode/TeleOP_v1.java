@@ -21,16 +21,16 @@ import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
  * Translating, releasing the bumper, and actual heading drift never change it.
  *
  * Original hardware names are retained; joystick spelling is corrected.
- * Plate presets and intake controls are configured in DriveDebug.java.
+ * Plate presets and intake controls are configured in Tele_debug_v1.java.
  * All positions are centimeters; all internal angles are radians; time is seconds.
  *
- * TUNING: All adjustable settings and diagnostic reports are in DriveDebug.java.
+ * TUNING: All adjustable settings and diagnostic reports are in Tele_debug_v1.java.
  * IMPORTANT: The supplied gains are starting values, not robot-specific tuning.
  * Feedback reduces tracking errors; it cannot remove slip, sensor drift, motor
  * saturation, static friction, or all steady-state error under a constant load.
  */
-@TeleOp(name = "test PD Target Drive", group = "test1")
-public class test1 extends LinearOpMode {
+@TeleOp(name = "TeleOP_v1", group = "TeleOP_v1")
+public class TeleOP_v1 extends LinearOpMode {
     private DcMotor intake;
     private Servo plate;
     private double plateTargetDegrees = Double.NaN;
@@ -40,7 +40,7 @@ public class test1 extends LinearOpMode {
     private DcMotor rightfront;
     private GoBildaPinpointDriver odometry;
 
-    // Edit DriveDebug.java to change tuning, directions, timing, or diagnostics.
+    // Edit Tele_debug_v1.java to change tuning, directions, timing, or diagnostics.
     // All original default values and drivetrain variable names are preserved.
 
     // The internal movement data that the gamepad modifies.
@@ -73,10 +73,10 @@ public class test1 extends LinearOpMode {
         odometry = hardwareMap.get(GoBildaPinpointDriver.class, "odometry");
 
         // Match the directions in your original code explicitly.
-        leftfront.setDirection(DriveDebug.LEFTFRONT_DIRECTION);
-        leftback.setDirection(DriveDebug.LEFTBACK_DIRECTION);
-        rightfront.setDirection(DriveDebug.RIGHTFRONT_DIRECTION);
-        rightback.setDirection(DriveDebug.RIGHTBACK_DIRECTION);
+        leftfront.setDirection(Tele_debug_v1.LEFTFRONT_DIRECTION);
+        leftback.setDirection(Tele_debug_v1.LEFTBACK_DIRECTION);
+        rightfront.setDirection(Tele_debug_v1.RIGHTFRONT_DIRECTION);
+        rightback.setDirection(Tele_debug_v1.RIGHTBACK_DIRECTION);
 
         for (DcMotor motor : new DcMotor[] {leftfront, leftback, rightfront, rightback}) {
             motor.setPower(0.0);
@@ -87,21 +87,21 @@ public class test1 extends LinearOpMode {
         }
 
         try {
-            DriveDebug.validateMechanismSettings();
+            Tele_debug_v1.validateMechanismSettings();
             intake = hardwareMap.get(DcMotor.class, "intake");
             intake.setPower(0.0);
-            intake.setDirection(DriveDebug.INTAKE_DIRECTION);
+            intake.setDirection(Tele_debug_v1.INTAKE_DIRECTION);
             intake.setZeroPowerBehavior(DcMotor.ZeroPowerBehavior.BRAKE);
             intake.setMode(DcMotor.RunMode.RUN_WITHOUT_ENCODER);
             plate = hardwareMap.get(Servo.class, "plate");
-            plate.setDirection(DriveDebug.PLATE_DIRECTION);
+            plate.setDirection(Tele_debug_v1.PLATE_DIRECTION);
             plate.scaleRange(0.0, 1.0);
-            if (DriveDebug.PLATE_USE_CUSTOM_PWM_RANGE) {
+            if (Tele_debug_v1.PLATE_USE_CUSTOM_PWM_RANGE) {
                 if (!(plate instanceof PwmControl)) {
                     throw new IllegalStateException("plate controller does not support custom PWM range");
                 }
                 ((PwmControl) plate).setPwmRange(new PwmControl.PwmRange(
-                        DriveDebug.PLATE_PWM_MIN_US, DriveDebug.PLATE_PWM_MAX_US));
+                        Tele_debug_v1.PLATE_PWM_MIN_US, Tele_debug_v1.PLATE_PWM_MAX_US));
             }
             // No automatic plate move during INIT; the first preset selects its target.
             // You confirmed your odometry already reports correctly. This code
@@ -113,14 +113,14 @@ public class test1 extends LinearOpMode {
             // Reset only during INIT, while the robot is stationary.
             odometry.resetPosAndIMU();
             targetHeading = 0.0; // The startup facing direction is the zero reference.
-            sleep(DriveDebug.IMU_RESET_WAIT_MS);
-            telemetry.setMsTransmissionInterval(DriveDebug.TELEMETRY_INTERVAL_MS);
+            sleep(Tele_debug_v1.IMU_RESET_WAIT_MS);
+            telemetry.setMsTransmissionInterval(Tele_debug_v1.TELEMETRY_INTERVAL_MS);
             while (!isStarted() && !isStopRequested()) {
                 odometry.update();
-                DriveDebug.reportInit(telemetry, odometry.getDeviceStatus(),
+                Tele_debug_v1.reportInit(telemetry, odometry.getDeviceStatus(),
                         odometry.getPosX(DistanceUnit.CM), odometry.getPosY(DistanceUnit.CM),
                         odometry.getHeading(AngleUnit.DEGREES));
-                sleep(DriveDebug.INIT_LOOP_SLEEP_MS);
+                sleep(Tele_debug_v1.INIT_LOOP_SLEEP_MS);
             }
             waitForStart();
             if (isStopRequested()) return;
@@ -146,22 +146,22 @@ public class test1 extends LinearOpMode {
                 boolean poseOK = odometry.getDeviceStatus()
                         == GoBildaPinpointDriver.DeviceStatus.READY
                         && finite(x) && finite(y) && finite(heading);
-                boolean timingOK = dt > 0.0 && dt <= DriveDebug.MAX_LOOP_SECONDS;
+                boolean timingOK = dt > 0.0 && dt <= Tele_debug_v1.MAX_LOOP_SECONDS;
                 if (!poseOK || !timingOK) {
                     intake.setPower(0.0);
-                    DriveDebug.reportMechanisms(telemetry, plateTargetDegrees, intake.getPower());
+                    Tele_debug_v1.reportMechanisms(telemetry, plateTargetDegrees, intake.getPower());
                     fault = !poseOK ? "Odometry not ready / invalid pose" : "Control loop delayed";
                     requireRelease = true;
                     tracking = false;
                     stopDrive();
-                    DriveDebug.reportSensorFault(telemetry, fault, odometry.getDeviceStatus());
-                    sleep(DriveDebug.CONTROL_LOOP_SLEEP_MS);
+                    Tele_debug_v1.reportSensorFault(telemetry, fault, odometry.getDeviceStatus());
+                    sleep(Tele_debug_v1.CONTROL_LOOP_SLEEP_MS);
                     continue;
                 }
 
                 // Mechanisms remain usable while the drivetrain bumper is released.
                 updateMechanisms();
-                DriveDebug.reportMechanisms(telemetry, plateTargetDegrees, intake.getPower());
+                Tele_debug_v1.reportMechanisms(telemetry, plateTargetDegrees, intake.getPower());
 
                 // Release means zero motor power, not position hold. BRAKE reduces
                 // coasting, but it is not a mechanical lock or an instantaneous stop.
@@ -171,15 +171,15 @@ public class test1 extends LinearOpMode {
                     tracking = false;
                     requireRelease = false;
                     fault = "";
-                    DriveDebug.reportDisabled(telemetry, x, y, heading,
+                    Tele_debug_v1.reportDisabled(telemetry, x, y, heading,
                             targetX, targetY, targetHeading);
-                    sleep(DriveDebug.CONTROL_LOOP_SLEEP_MS);
+                    sleep(Tele_debug_v1.CONTROL_LOOP_SLEEP_MS);
                     continue;
                 }
                 if (requireRelease) {
                     stopDrive();
-                    DriveDebug.reportReleaseRequired(telemetry, fault);
-                    sleep(DriveDebug.CONTROL_LOOP_SLEEP_MS);
+                    Tele_debug_v1.reportReleaseRequired(telemetry, fault);
+                    sleep(Tele_debug_v1.CONTROL_LOOP_SLEEP_MS);
                     continue;
                 }
                 if (!tracking) {
@@ -187,14 +187,14 @@ public class test1 extends LinearOpMode {
                     resetTarget(x, y, heading);
                     tracking = true;
                     stopDrive();
-                    sleep(DriveDebug.CONTROL_LOOP_SLEEP_MS);
+                    sleep(Tele_debug_v1.CONTROL_LOOP_SLEEP_MS);
                     continue;
                 }
 
                 // Derivative measurement: differentiate WORLD pose, then low-pass
                 // filter the velocity. Wrapped angle differences avoid a false
                 // full-turn velocity spike when heading crosses +/-180 degrees.
-                double alpha = dt / (DriveDebug.VELOCITY_FILTER_SECONDS + dt);
+                double alpha = dt / (Tele_debug_v1.VELOCITY_FILTER_SECONDS + dt);
                 velocityX += alpha * ((x - previousX) / dt - velocityX);
                 velocityY += alpha * ((y - previousY) / dt - velocityY);
                 angularVelocity += alpha * (wrap(heading - previousHeading) / dt - angularVelocity);
@@ -208,8 +208,8 @@ public class test1 extends LinearOpMode {
 
                 // Normalize diagonal input so diagonal target speed is not faster.
                 double stickLength = Math.max(1.0, Math.hypot(forward, left));
-                double forwardSpeed = forward / stickLength * DriveDebug.MAX_SPEED_CM_S;
-                double leftSpeed = left / stickLength * DriveDebug.MAX_SPEED_CM_S;
+                double forwardSpeed = forward / stickLength * Tele_debug_v1.MAX_SPEED_CM_S;
+                double leftSpeed = left / stickLength * Tele_debug_v1.MAX_SPEED_CM_S;
                 double cos = Math.cos(heading);
                 double sin = Math.sin(heading);
 
@@ -223,7 +223,7 @@ public class test1 extends LinearOpMode {
                 double targetVelocityX = 2*(commandCos * forwardSpeed - commandSin * leftSpeed);
                 double targetVelocityY = 2*(commandSin * forwardSpeed + commandCos * leftSpeed);
                 // Pinpoint heading is CCW-positive; your rotation stick is CW-positive.
-                double targetAngularVelocity = 2*(-rotate * DriveDebug.MAX_TURN_RAD_S);
+                double targetAngularVelocity = 2*(-rotate * Tele_debug_v1.MAX_TURN_RAD_S);
 
                 // Integrate velocity to create the internal target pose.
                 // If the next step exceeds the lead limit, freeze translation
@@ -233,7 +233,7 @@ public class test1 extends LinearOpMode {
                 double nextY = targetY + targetVelocityY * dt;
                 double oldDistance = Math.hypot(targetX - x, targetY - y);
                 double nextDistance = Math.hypot(nextX - x, nextY - y);
-                boolean translationLimited = nextDistance > DriveDebug.MAX_TARGET_LEAD_CM
+                boolean translationLimited = nextDistance > Tele_debug_v1.MAX_TARGET_LEAD_CM
                         && nextDistance >= oldDistance;
                 if (translationLimited) {
                     targetVelocityX = 0.0;
@@ -246,7 +246,7 @@ public class test1 extends LinearOpMode {
                 double nextHeading = wrap(targetHeading + targetAngularVelocity * dt);
                 double oldAngleError = Math.abs(wrap(targetHeading - heading));
                 double nextAngleError = Math.abs(wrap(nextHeading - heading));
-                boolean rotationLimited = nextAngleError > DriveDebug.MAX_TARGET_LEAD_RAD
+                boolean rotationLimited = nextAngleError > Tele_debug_v1.MAX_TARGET_LEAD_RAD
                         && nextAngleError >= oldAngleError;
                 if (rotationLimited) {
                     targetAngularVelocity = 0.0;
@@ -259,16 +259,16 @@ public class test1 extends LinearOpMode {
                 double errorX = targetX - x;
                 double errorY = targetY - y;
                 double errorHeading = wrap(targetHeading - heading);
-                if (Math.hypot(errorX, errorY) > DriveDebug.STOP_ERROR_CM
-                        || Math.abs(errorHeading) > DriveDebug.STOP_ERROR_RAD) {
+                if (Math.hypot(errorX, errorY) > Tele_debug_v1.STOP_ERROR_CM
+                        || Math.abs(errorHeading) > Tele_debug_v1.STOP_ERROR_RAD) {
                     intake.setPower(0.0);
-                    DriveDebug.reportMechanisms(telemetry, plateTargetDegrees, intake.getPower());
+                    Tele_debug_v1.reportMechanisms(telemetry, plateTargetDegrees, intake.getPower());
                     fault = "Tracking error too large";
                     stopDrive();
                     requireRelease = true;
                     tracking = false;
-                    DriveDebug.reportTrackingFault(telemetry, fault);
-                    sleep(DriveDebug.CONTROL_LOOP_SLEEP_MS);
+                    Tele_debug_v1.reportTrackingFault(telemetry, fault);
+                    sleep(Tele_debug_v1.CONTROL_LOOP_SLEEP_MS);
                     continue;
                 }
 
@@ -277,12 +277,12 @@ public class test1 extends LinearOpMode {
                 // D corrects target velocity minus actual velocity (error rate).
                 // With centered sticks, target velocity is zero, so D damps motion.
                 // No integral or feedforward term is included in this PD-only design.
-                double powerX = DriveDebug.KP_POSITION * errorX
-                        + DriveDebug.KD_POSITION * (targetVelocityX - velocityX);
-                double powerY = DriveDebug.KP_POSITION * errorY
-                        + DriveDebug.KD_POSITION * (targetVelocityY - velocityY);
-                double powerCCW = DriveDebug.KP_HEADING * errorHeading
-                        + DriveDebug.KD_HEADING * (targetAngularVelocity - angularVelocity);
+                double powerX = Tele_debug_v1.KP_POSITION * errorX
+                        + Tele_debug_v1.KD_POSITION * (targetVelocityX - velocityX);
+                double powerY = Tele_debug_v1.KP_POSITION * errorY
+                        + Tele_debug_v1.KD_POSITION * (targetVelocityY - velocityY);
+                double powerCCW = Tele_debug_v1.KP_HEADING * errorHeading
+                        + Tele_debug_v1.KD_HEADING * (targetAngularVelocity - angularVelocity);
                 powerCCW = applyHeadingTolerance(powerCCW, errorHeading, rotate);
 
                 // Convert world correction back into the robot's current axes.
@@ -292,10 +292,10 @@ public class test1 extends LinearOpMode {
                 drive(forwardPower, leftPower, clockwisePower);
                 //  drive(forward, left, rotate);
 
-                DriveDebug.reportRunning(telemetry, x, y, heading,
+                Tele_debug_v1.reportRunning(telemetry, x, y, heading,
                         targetX, targetY, targetHeading, errorX, errorY, errorHeading,
                         headingSettled, translationLimited, rotationLimited);
-                sleep(DriveDebug.CONTROL_LOOP_SLEEP_MS);
+                sleep(Tele_debug_v1.CONTROL_LOOP_SLEEP_MS);
             }
         } finally {
             // Also stop if an exception interrupts the control loop.
@@ -309,29 +309,29 @@ public class test1 extends LinearOpMode {
     }
 
     private void updateMechanisms() {
-        Gamepad plateGamepad = mechanismGamepad(DriveDebug.PLATE_GAMEPAD);
+        Gamepad plateGamepad = mechanismGamepad(Tele_debug_v1.PLATE_GAMEPAD);
         // If several preset buttons are held, priority is preset 1, 2, 3, then 4.
         double requestedDegrees = Double.NaN;
-        if (DriveDebug.isPressed(plateGamepad, DriveDebug.PLATE_PRESET_1_BUTTON)) {
-            requestedDegrees = DriveDebug.PLATE_PRESET_1_DEGREES;
-        } else if (DriveDebug.isPressed(plateGamepad, DriveDebug.PLATE_PRESET_2_BUTTON)) {
-            requestedDegrees = DriveDebug.PLATE_PRESET_2_DEGREES;
-        } else if (DriveDebug.isPressed(plateGamepad, DriveDebug.PLATE_PRESET_3_BUTTON)) {
-            requestedDegrees = DriveDebug.PLATE_PRESET_3_DEGREES;
-        } else if (DriveDebug.isPressed(plateGamepad, DriveDebug.PLATE_PRESET_4_BUTTON)) {
-            requestedDegrees = DriveDebug.PLATE_PRESET_4_DEGREES;
+        if (Tele_debug_v1.isPressed(plateGamepad, Tele_debug_v1.PLATE_PRESET_1_BUTTON)) {
+            requestedDegrees = Tele_debug_v1.PLATE_PRESET_1_DEGREES;
+        } else if (Tele_debug_v1.isPressed(plateGamepad, Tele_debug_v1.PLATE_PRESET_2_BUTTON)) {
+            requestedDegrees = Tele_debug_v1.PLATE_PRESET_2_DEGREES;
+        } else if (Tele_debug_v1.isPressed(plateGamepad, Tele_debug_v1.PLATE_PRESET_3_BUTTON)) {
+            requestedDegrees = Tele_debug_v1.PLATE_PRESET_3_DEGREES;
+        } else if (Tele_debug_v1.isPressed(plateGamepad, Tele_debug_v1.PLATE_PRESET_4_BUTTON)) {
+            requestedDegrees = Tele_debug_v1.PLATE_PRESET_4_DEGREES;
         }
         if (!Double.isNaN(requestedDegrees) && requestedDegrees != plateTargetDegrees) {
-            plate.setPosition(DriveDebug.platePosition(requestedDegrees));
+            plate.setPosition(Tele_debug_v1.platePosition(requestedDegrees));
             plateTargetDegrees = requestedDegrees;
         }
 
-        Gamepad intakeGamepad = mechanismGamepad(DriveDebug.INTAKE_GAMEPAD);
+        Gamepad intakeGamepad = mechanismGamepad(Tele_debug_v1.INTAKE_GAMEPAD);
         // Preserve original behavior: forward button wins if both are held.
-        if (DriveDebug.isPressed(intakeGamepad, DriveDebug.INTAKE_FORWARD_BUTTON)) {
-            intake.setPower(DriveDebug.INTAKE_FORWARD_POWER);
-        } else if (DriveDebug.isPressed(intakeGamepad, DriveDebug.INTAKE_REVERSE_BUTTON)) {
-            intake.setPower(DriveDebug.INTAKE_REVERSE_POWER);
+        if (Tele_debug_v1.isPressed(intakeGamepad, Tele_debug_v1.INTAKE_FORWARD_BUTTON)) {
+            intake.setPower(Tele_debug_v1.INTAKE_FORWARD_POWER);
+        } else if (Tele_debug_v1.isPressed(intakeGamepad, Tele_debug_v1.INTAKE_REVERSE_BUTTON)) {
+            intake.setPower(Tele_debug_v1.INTAKE_REVERSE_POWER);
         } else {
             intake.setPower(0.0);
         }
@@ -352,10 +352,10 @@ public class test1 extends LinearOpMode {
         if (rotate != 0.0f) {
             headingSettled = false; // Always respond to deliberate turning input.
         } else if (headingSettled) {
-            if (angleError >= DriveDebug.HEADING_RESUME_RAD || turnRate >= DriveDebug.RESUME_TURN_RATE_RAD_S) {
+            if (angleError >= Tele_debug_v1.HEADING_RESUME_RAD || turnRate >= Tele_debug_v1.RESUME_TURN_RATE_RAD_S) {
                 headingSettled = false;
             }
-        } else if (angleError <= DriveDebug.HEADING_TOLERANCE_RAD && turnRate <= DriveDebug.SETTLED_TURN_RATE_RAD_S) {
+        } else if (angleError <= Tele_debug_v1.HEADING_TOLERANCE_RAD && turnRate <= Tele_debug_v1.SETTLED_TURN_RATE_RAD_S) {
             headingSettled = true;
         }
         // Tolerance changes motor correction, never the stored target angle.
@@ -363,9 +363,9 @@ public class test1 extends LinearOpMode {
     }
 
     private void drive(double forwardPower, double leftPower, double clockwisePower) {
-        forwardPower *= DriveDebug.FORWARD_MIX_SIGN;
-        leftPower *= DriveDebug.LEFT_MIX_SIGN;
-        clockwisePower *= DriveDebug.CLOCKWISE_MIX_SIGN;
+        forwardPower *= Tele_debug_v1.FORWARD_MIX_SIGN;
+        leftPower *= Tele_debug_v1.LEFT_MIX_SIGN;
+        clockwisePower *= Tele_debug_v1.CLOCKWISE_MIX_SIGN;
 
         // Your original wheel equations, with PD outputs replacing joystick values.
         double leftfrontPower = forwardPower + leftPower + clockwisePower;
@@ -377,7 +377,7 @@ public class test1 extends LinearOpMode {
         // Independent clipping would distort the requested motion direction.
         double largest = Math.max(Math.max(Math.abs(leftfrontPower), Math.abs(rightfrontPower)),
                 Math.max(Math.abs(leftbackPower), Math.abs(rightbackPower)));
-        double scale = largest > DriveDebug.MAX_MOTOR_POWER ? DriveDebug.MAX_MOTOR_POWER / largest : 1.0;
+        double scale = largest > Tele_debug_v1.MAX_MOTOR_POWER ? Tele_debug_v1.MAX_MOTOR_POWER / largest : 1.0;
         leftfront.setPower(leftfrontPower * scale);
         rightfront.setPower(rightfrontPower * scale);
         leftback.setPower(leftbackPower * scale);
@@ -392,9 +392,9 @@ public class test1 extends LinearOpMode {
     }
 
     private static double deadband(double value) {
-        if (Math.abs(value) <= DriveDebug.STICK_DEADBAND) return 0.0;
+        if (Math.abs(value) <= Tele_debug_v1.STICK_DEADBAND) return 0.0;
         // Rescale the remaining range smoothly from zero to full command.
-        return Math.copySign((Math.abs(value) - DriveDebug.STICK_DEADBAND) / (1.0 - DriveDebug.STICK_DEADBAND), value);
+        return Math.copySign((Math.abs(value) - Tele_debug_v1.STICK_DEADBAND) / (1.0 - Tele_debug_v1.STICK_DEADBAND), value);
     }
 
     private static double wrap(double angle) {

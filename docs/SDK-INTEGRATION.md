@@ -55,7 +55,7 @@ A successful build verifies SDK compilation and APK packaging, not robot behavio
 ## Existing code issues retained for follow-up
 
 - Target translation and rotation velocities have an extra factor of two in
-  `test1.java`, beyond the named speed constants.
+  `TeleOP_v1.java`, beyond the named speed constants.
 - `STOP_ERROR_RAD` is 600 degrees, while wrapped heading errors cannot exceed
   180 degrees; the heading-error stop condition cannot trigger at this value.
 - Drivetrain settings do not yet have startup validation.

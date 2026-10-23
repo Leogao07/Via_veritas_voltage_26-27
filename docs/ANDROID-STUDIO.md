@@ -72,15 +72,15 @@ select the **TeamCode** run configuration and that device, then click **Run**.
 Installation updates the Robot Controller app on the selected device. Use a
 compatible Driver Station from the official FTC v12.0 release. Configure the
 hardware names in the [root README](../README.md#hardware-configuration-names).
-After installation, select `test PD Target Drive` in the Driver Station TeleOp list.
+After installation, select `TeleOP_v1` in the Driver Station TeleOp list.
 Compilation does not verify motor directions, Pinpoint setup, or mechanism limits;
 complete the [robot checks](SDK-INTEGRATION.md#before-robot-operation) on the robot.
 
 ## 5. Work with teammates
 
 Team Java code lives in `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/`.
-Use the same package for new team classes. Edit `DriveDebug.java` for tuning and
-`test1.java` for the existing TeleOp behavior.
+Use the same package for new team classes. Edit `Tele_debug_v1.java` for tuning and
+`TeleOP_v1.java` for the existing TeleOp behavior.
 
 Use Android Studio's Git tools or its terminal for the same branch workflow:
 

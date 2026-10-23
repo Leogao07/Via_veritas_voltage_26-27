@@ -8,10 +8,10 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
 
 /**
  * Drive, plate, intake settings and Driver Station diagnostic output live here.
- * test1.java reads these values and calls the reporting methods automatically.
+ * TeleOP_v1.java reads these values and calls the reporting methods automatically.
  * This is a helper class, NOT a second OpMode: do not add @TeleOp or runOpMode().
  *
- * INSTALL: Put this file and test1.java in the same package, then build BOTH.
+ * INSTALL: Put this file and TeleOP_v1.java in the same package, then build BOTH.
  * TUNE: Stop the robot, edit a value, build the project, then INIT again.
  * These are compile-time settings, not live gamepad-adjustable settings.
  * All defaults below exactly match the working code you supplied.
@@ -23,8 +23,8 @@ import org.firstinspires.ftc.robotcore.external.Telemetry;
  * Change one setting at a time and compare the displayed tracking errors.
  * Never raise a fault threshold just to hide an unexplained fault.
  */
-public final class DriveDebug {
-    private DriveDebug() { } // No object needs to be constructed.
+public final class Tele_debug_v1 {
+    private Tele_debug_v1() { } // No object needs to be constructed.
 
     // ==================== PLATE AND INTAKE  ====================
     // Change gamepad number (1/2), Button value, angle or power here, then rebuild.
