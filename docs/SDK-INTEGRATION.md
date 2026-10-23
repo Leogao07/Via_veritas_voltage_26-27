@@ -34,7 +34,8 @@ revision, excluding the added package declaration.
 The build reports upstream Java 8 source/target and Gradle deprecation warnings.
 Native libraries were packaged without stripping debug symbols; this did not
 prevent APK generation. Robot installation and hardware testing were not performed.
-The CI workflow has been added but has not yet run on GitHub.
+The GitHub Actions APK build [passed for commit `ec9cf0c`](https://github.com/Leogao07/Via_veritas_voltage/actions/runs/39948262006)
+after the setup was corrected to skip the retired Android `tools` package.
 
 The GitHub Actions workflow runs the same APK build for pushes and pull requests.
 A successful build verifies SDK compilation and APK packaging, not robot behavior.

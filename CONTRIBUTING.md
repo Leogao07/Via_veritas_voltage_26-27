@@ -10,6 +10,14 @@ This repository contains the team's source files for the 2026-2027 FTC BIOBUZZ s
 
 The repository owner can invite GitHub users through **Settings > Collaborators > Add people**. Each teammate must accept the invitation before accessing this private repository. No collaborators are invited automatically by this setup.
 
+## Android Studio onboarding
+
+After accepting the collaborator invitation, follow the
+[Android Studio setup and collaboration guide](docs/ANDROID-STUDIO.md). It covers
+cloning this repository, setting JDK 21 and the Android SDK, building TeamCode,
+and using the same branch workflow as VS Code teammates. Each developer configures
+their own local environment; repository access alone does not install those tools.
+
 ## Branches and reviews
 
 1. Commit or otherwise preserve unfinished work before switching branches.

@@ -25,6 +25,9 @@ no extra Pinpoint library is required.
 
 ## Build and deploy
 
+New teammates: follow the [Android Studio setup and collaboration guide](docs/ANDROID-STUDIO.md)
+for cloning, JDK/SDK configuration, building, deployment, and the shared Git workflow.
+
 1. Open this repository's root directory in Android Studio. Use a version supporting
    Android Gradle Plugin **8.13.2** and select **JDK 21** as the Gradle JDK.
 2. Install Android SDK Platform **30**, Build Tools **35.0.0**, and Platform Tools
@@ -123,5 +126,5 @@ Use the current official manual and team updates when making game-specific decis
 - Initial Java import: checked against the supplied files.
 - English documentation: reviewed during repository setup.
 - FTC SDK 12.0.0 compilation and debug APK packaging: passed on October 23, 2026.
-- GitHub Actions build workflow: added; not yet run on GitHub.
+- GitHub Actions APK build: [passed for commit `ec9cf0c`](https://github.com/Leogao07/Via_veritas_voltage/actions/runs/39948262006).
 - Robot testing: not performed as part of repository setup.
