@@ -17,6 +17,9 @@ the technical reference for building the project, hardware names, and driver con
 
 ## Connect VS Code to GitHub and make your first commit
 
+I am more familiar with VS Code; if you use another development environment,
+please search Google or ask an AI assistant for help.
+
 Already installed VS Code and received a collaborator invitation? Follow these
 steps on your own computer. Setup steps 1–4 normally only need to be done once;
 steps 5–8 are the workflow for each new task.
