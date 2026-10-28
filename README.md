@@ -46,6 +46,55 @@ for local setup, USB or Wi-Fi connection, build/install commands, hardware
 configuration, first TeleOp run, and troubleshooting. It also explains how to
 move from Codespaces to a local computer for robot deployment.
 
+### Quick start: connect to the robot from VS Code on a Mac
+
+One-time setup:
+
+1. Install Android Studio. It provides the Android SDK in `~/Library/Android/sdk`
+   and the `adb` tool. You do not need to use it for editing.
+2. Install **JDK 21**, for example Eclipse Temurin 21 from https://adoptium.net
+   (choose the aarch64 build on Apple Silicon Macs).
+3. Add these lines to `~/.zshrc`, then quit VS Code (Cmd+Q) and reopen it:
+
+   ```sh
+   export JAVA_HOME="$(/usr/libexec/java_home -v 21)"
+   export ANDROID_HOME="$HOME/Library/Android/sdk"
+   export PATH="$JAVA_HOME/bin:$ANDROID_HOME/platform-tools:$PATH"
+   ```
+
+4. Check the setup in VS Code's terminal. `java -version` should report 21, and
+   `adb version` should print a version number.
+5. Run the first build while you have internet access. If the SDK licenses are
+   accepted, Gradle downloads the missing SDK Platform 30 and Build-Tools 35.0.0
+   automatically:
+
+   ```sh
+   ./gradlew assembleDebug
+   ```
+
+Each time you deploy:
+
+1. Power on the robot and connect the Control Hub to the Mac with a USB-C data cable.
+2. Run `adb devices`. The Control Hub should be listed with status `device`.
+3. Build and install:
+
+   ```sh
+   ./gradlew assembleDebug && adb install -r TeamCode/build/outputs/apk/debug/TeamCode-debug.apk
+   ```
+
+4. On the Driver Station, wait for the robot to reconnect, select the `2026-27`
+   configuration if needed, choose your OpMode, then press INIT and START.
+
+Common problems:
+
+| Message | Fix |
+| --- | --- |
+| `command not found: adb` | Check the `~/.zshrc` lines above and reopen VS Code. |
+| `adb devices` shows nothing | Check robot power and use a USB-C cable that carries data, not just charging. |
+| `INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures do not match` | The hub has an app signed with a different key, such as the factory-installed Robot Controller. Run `adb uninstall com.qualcomm.ftcrobotcontroller` once, then install again. Robot configurations in the hub's `FIRST` folder are kept. Builds from this repository share `libs/ftc.debug.keystore`, so teammates' builds replace each other without this step. |
+| `XXXX-DS does not match YYYY-RC` | The Driver Station and Control Hub names use different team numbers. Rename the wrong device to use the team number (Driver Station menu > Settings). |
+| `no voltage sensor` | No hardware configuration is active. Open Configure Robot and activate `2026-27`. |
+
 New teammates: follow the [Android Studio setup and collaboration guide](docs/ANDROID-STUDIO.md)
 for cloning, JDK/SDK configuration, building, deployment, and the shared Git workflow.
 
