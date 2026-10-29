@@ -85,6 +85,34 @@ Each time you deploy:
 4. On the Driver Station, wait for the robot to reconnect, select the `2026-27`
    configuration if needed, choose your OpMode, then press INIT and START.
 
+Every OpMode in `TeamCode`, TeleOp and Autonomous alike, is packaged into this one
+app, so this single command deploys all of them. Driver Station lists each class
+under Autonomous or TeleOp according to its `@Autonomous` or `@TeleOp` annotation.
+The `debug` build type only means the app is signed with the shared
+`libs/ftc.debug.keystore`; it is the normal build for FTC practice and competition.
+
+Deploying over Wi-Fi instead of USB:
+
+1. Join the Mac to the robot's Wi-Fi network, which has the Control Hub's name
+   (`32898-RC`).
+2. Connect ADB to the Control Hub and confirm it is listed with status `device`:
+
+   ```sh
+   adb connect 192.168.43.1:5555
+   adb devices
+   ```
+
+3. Build and install with the same command as for USB.
+4. When finished, run `adb disconnect 192.168.43.1:5555`.
+
+The robot network has no internet access. Builds normally work offline after the
+first successful build; if Gradle reports a download failure, use
+`./gradlew assembleDebug --offline` or build on a network with internet first.
+If USB is also connected, `adb install` reports more than one device; select the
+Wi-Fi target with `adb -s 192.168.43.1:5555 install -r TeamCode/build/outputs/apk/debug/TeamCode-debug.apk`.
+`192.168.43.1` is the default Control Hub address; if it does not connect, check
+the address on Driver Station's Program & Manage page.
+
 Common problems:
 
 | Message | Fix |
@@ -92,7 +120,7 @@ Common problems:
 | `command not found: adb` | Check the `~/.zshrc` lines above and reopen VS Code. |
 | `adb devices` shows nothing | Check robot power and use a USB-C cable that carries data, not just charging. |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures do not match` | The hub has an app signed with a different key, such as the factory-installed Robot Controller. Run `adb uninstall com.qualcomm.ftcrobotcontroller` once, then install again. Robot configurations in the hub's `FIRST` folder are kept. Builds from this repository share `libs/ftc.debug.keystore`, so teammates' builds replace each other without this step. |
-| `XXXX-DS does not match YYYY-RC` | The Driver Station and Control Hub names use different team numbers. Rename the wrong device to use the team number (Driver Station menu > Settings). |
+| `XXXX-DS does not match YYYY-RC` | The Driver Station and Control Hub names use different team numbers. Our team number is 32898, so the names must be `32898-DS` and `32898-RC`. Rename the wrong device from the Driver Station menu > Settings. |
 | `no voltage sensor` | No hardware configuration is active. Open Configure Robot and activate `2026-27`. |
 
 New teammates: follow the [Android Studio setup and collaboration guide](docs/ANDROID-STUDIO.md)
