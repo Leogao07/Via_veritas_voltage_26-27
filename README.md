@@ -94,7 +94,7 @@ The `debug` build type only means the app is signed with the shared
 Deploying over Wi-Fi instead of USB:
 
 1. Join the Mac to the robot's Wi-Fi network, which has the Control Hub's name
-   (for example `12345-RC`).
+   (`32898-RC`).
 2. Connect ADB to the Control Hub and confirm it is listed with status `device`:
 
    ```sh
@@ -120,7 +120,7 @@ Common problems:
 | `command not found: adb` | Check the `~/.zshrc` lines above and reopen VS Code. |
 | `adb devices` shows nothing | Check robot power and use a USB-C cable that carries data, not just charging. |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures do not match` | The hub has an app signed with a different key, such as the factory-installed Robot Controller. Run `adb uninstall com.qualcomm.ftcrobotcontroller` once, then install again. Robot configurations in the hub's `FIRST` folder are kept. Builds from this repository share `libs/ftc.debug.keystore`, so teammates' builds replace each other without this step. |
-| `XXXX-DS does not match YYYY-RC` | The Driver Station and Control Hub names use different team numbers. Rename the wrong device to use the team number (Driver Station menu > Settings). |
+| `XXXX-DS does not match YYYY-RC` | The Driver Station and Control Hub names use different team numbers. Our team number is 32898, so the names must be `32898-DS` and `32898-RC`. Rename the wrong device from the Driver Station menu > Settings. |
 | `no voltage sensor` | No hardware configuration is active. Open Configure Robot and activate `2026-27`. |
 
 New teammates: follow the [Android Studio setup and collaboration guide](docs/ANDROID-STUDIO.md)
