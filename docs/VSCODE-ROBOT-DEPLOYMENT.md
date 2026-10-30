@@ -203,31 +203,34 @@ adb -s ACTUAL_SERIAL install -r "TeamCode/build/outputs/apk/debug/TeamCode-debug
    | `elevator` | Elevator motor |
    | `Spoon` | Spoon servo |
    | `Camera_angle` | Camera angle servo |
+   | `limelight` | Limelight 3A (USB) |
 
    Preserve the exact spelling and capitalization, including `Flywheel`, `Spoon`,
    and `Camera_angle`. Match the real ports and wiring; this repository does not
    record every port assignment. The current OpMode does not read either distance sensor, so they
-   do not yet trigger automatic actions. It also does not initialize or control
-   `Flywheel`, `elevator`, `Spoon`, or `Camera_angle`; their control settings and
-   gamepad assignments remain to be specified.
+   do not yet trigger automatic actions. It does not control `Flywheel`,
+   `elevator`, or `Spoon`; their control settings and gamepad assignments remain
+   to be specified. For hive aiming it reads `limelight` and moves `Camera_angle`
+   to its aim position at START.
 3. Before running, complete the [robot checks](SDK-INTEGRATION.md#before-robot-operation),
    including motor direction, Pinpoint pod configuration, and plate servo limits.
    Support the robot with its drive wheels clear and keep mechanisms clear.
    INIT can initialize hardware, so prepare before pressing it.
 4. Assign the gamepads in Driver Station. In the TeleOp list select `TeleOP_v1`,
    press **INIT**, inspect telemetry/errors, and then press **START**.
-5. Release gamepad 1's left bumper after starting, then hold it to enable driving.
-   Use small stick movements initially. Releasing the bumper stops drive power.
-   Centered sticks with the bumper held can still command pose corrections.
+5. Release gamepad 1's A button after starting, then hold it to enable driving.
+   Use small stick movements initially. Releasing A stops drive power.
+   Centered sticks with A held can still command pose corrections.
 6. Test each mechanism separately, then use **STOP** when finished.
 
 Current controls:
 
 | Input | Action |
 | --- | --- |
-| Gamepad 1 left bumper | Hold to enable PD driving after the startup release |
+| Gamepad 1 A | Hold to enable PD driving after the startup release |
 | Gamepad 1 left stick | Move the virtual translation target |
 | Gamepad 1 right-stick X | Change target heading |
+| Gamepad 1 X / B | Hold to aim at the nearest blue / red hive; also enables PD. See the [README](../README.md#teleop-hive-aiming). |
 | Gamepad 2 Y / X / A / B | Plate targets: 27 / 117 / 207 / 297 degrees |
 | Gamepad 2 left / right bumper | Intake forward / reverse; release to stop |
 
@@ -306,7 +309,7 @@ install anything on the robot.
 | Signature / version conflict during install | Check the installed RC app and team's SDK/signing setup; coordinate recovery before uninstalling, which can remove app data. |
 | `TeleOP_v1` missing | Confirm installation succeeded on the intended Control Hub and Robot Controller restarted; verify you built the branch containing the OpMode. |
 | Hardware lookup error during INIT | Check the active configuration's exact names and device types against section 5. |
-| Robot does not drive after START | Check gamepad assignment; release then hold gamepad 1 left bumper, inspect telemetry and Pinpoint feedback. |
+| Robot does not drive after START | Check gamepad assignment; release then hold gamepad 1 A, inspect telemetry and Pinpoint feedback. |
 | Wi-Fi ADB cannot connect | Check the computer's robot Wi-Fi connection and actual Program & Manage address; try USB again. |
 
 ## References and verification

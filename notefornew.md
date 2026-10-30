@@ -353,8 +353,9 @@ motion settings will be added as the team develops them.
 | How to set up Android Studio | [docs/ANDROID-STUDIO.md](docs/ANDROID-STUDIO.md) | Accepting the invitation, cloning the project, configuring JDK/SDK, building, and deploying. |
 | Where autonomous execution logic lives | [auto_V1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/auto/auto_V1.java) | Auto entry point and the place for the programmed sequence; currently a scaffold without robot actions. |
 | Where autonomous settings and tuning live | [auto_debug_V1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/auto/auto_debug_V1.java) | Settings used by auto_V1; currently the telemetry update interval. |
-| What our driver-controlled program does | [TeleOP_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/TeleOP_v1.java) | TeleOp logic: gamepad input, robot position feedback, drivetrain control, intake, and plate presets. |
-| Where TeleOp settings and tuning live | [Tele_debug_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/Tele_debug_v1.java) | Settings for mechanisms, speed commands, controller gains, motor directions, and diagnostic displays. |
+| What our driver-controlled program does | [TeleOP_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/TeleOP_v1.java) | TeleOp logic: gamepad input, robot position feedback, drivetrain control, intake, plate presets, and hive aiming (hold X blue, B red). |
+| Where TeleOp settings and tuning live | [Tele_debug_v1.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/Tele_debug_v1.java) | Settings for mechanisms, speed commands, controller gains, motor directions, hive aiming, and diagnostic displays. |
+| How TeleOp finds the middle of a hive | [HiveAim.java](TeamCode/src/main/java/org/firstinspires/ftc/teamcode/vision/HiveAim.java) | Aiming math that finds the middle of a hive from any of its visible AprilTags. See the [README](README.md#teleop-hive-aiming). |
 | Which hardware names and buttons we use | [README.md](README.md) | Hardware configuration names, driver controls, build instructions, and verification status. |
 | How to share changes with teammates | [CONTRIBUTING.md](CONTRIBUTING.md) | Branches, commits, pull requests, reviews, and handling conflicts. |
 | What still needs checking on the robot | [docs/SDK-INTEGRATION.md](docs/SDK-INTEGRATION.md) | SDK details, build verification, robot checks, and known issues to follow up. |
@@ -379,6 +380,8 @@ Via_veritas_voltage_26-27/
                                 ├── teleop/
                                 │   ├── TeleOP_v1.java
                                 │   └── Tele_debug_v1.java
+                                ├── vision/
+                                │   └── HiveAim.java
                                 └── readme.md
 ```
 
@@ -386,7 +389,7 @@ Some editors combine the folders into `org.firstinspires.ftc.teamcode`. That is
 the same location; expand `auto` or `teleop` to find each pair of Java files.
 Their packages are `org.firstinspires.ftc.teamcode.auto` and
 `org.firstinspires.ftc.teamcode.teleop`, respectively. You can also use your
-editor's file search and type any of the four filenames to open it directly.
+editor's file search and type any of these filenames to open it directly.
 
 After building and installing the app, select **auto_V1** from Driver Station's
 Auto/Autonomous list or **TeleOP_v1** from its TeleOp list. The execution files

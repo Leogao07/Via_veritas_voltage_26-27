@@ -9,7 +9,9 @@ robot controller App. The team's TeleOp program and tuning helper are
 `org.firstinspires.ftc.teamcode.teleop`. The Auto execution file and tuning helper
 are [auto/auto_V1.java](auto/auto_V1.java) and
 [auto/auto_debug_V1.java](auto/auto_debug_V1.java), using the package
-`org.firstinspires.ftc.teamcode.auto`.
+`org.firstinspires.ftc.teamcode.auto`. The hive aiming math that TeleOp uses is
+[vision/HiveAim.java](vision/HiveAim.java), in the package
+`org.firstinspires.ftc.teamcode.vision`.
 
 Each execution file contains its mode's control logic; its Debug helper supplies
 the adjustable settings. Rebuild and install after changing either file. Only

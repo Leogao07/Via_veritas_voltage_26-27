@@ -2,8 +2,9 @@ package org.firstinspires.ftc.teamcode.vision;
 
 /**
  * Finds the middle of a hive from the Limelight tx angles of its AprilTags.
- * TeleOP_v1 (aim button) and both Auto programs use it, so all three aim the
- * same way. This helper is not an OpMode and has no settings of its own.
+ * It is shared so that TeleOP_v1's aim buttons and any Auto program that aims at
+ * a hive work the same way. This helper is not an OpMode and has no settings of
+ * its own.
  *
  * A hive's tags sit in a straight row. Each tag's u = tan(tx) follows
  * u = (m + k1 * p) / (1 + k2 * p), where p is the tag's position along the row

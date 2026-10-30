@@ -64,10 +64,10 @@ A successful build verifies SDK compilation and APK packaging, not robot behavio
 - Configure `leftfront`, `leftback`, `rightfront`, `rightback`, `odometry`,
   `intake`, and `plate` with the correct device types in the Robot Controller.
 - Include the additional mechanism names with exact capitalization: `Flywheel`
-  and `elevator` are motors; `Spoon` and `Camera_angle` are servos. Their names
-  and types are documented, but the current OpMode does not initialize or control
-  them. Record their models, hub/port assignments, directions, operating limits,
-  and controls before implementing their behavior.
+  and `elevator` are motors; `Spoon` and `Camera_angle` are servos; `limelight`
+  is the Limelight 3A. TeleOp uses only `limelight` and `Camera_angle`, for hive
+  aiming, and runs without them. Record their models, hub/port assignments,
+  directions, operating limits, and controls before implementing their behavior.
 - The team reports that `intakesensor` and `outtakesensor` are already configured
   as goBILDA analog distance sensors. Confirm that these exact names are retained
   in the active configuration. The supplied signal meanings are 0 V for no object
