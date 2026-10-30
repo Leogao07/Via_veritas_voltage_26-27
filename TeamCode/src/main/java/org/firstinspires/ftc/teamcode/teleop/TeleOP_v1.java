@@ -1,6 +1,9 @@
 package org.firstinspires.ftc.teamcode.teleop;
 
 import com.qualcomm.hardware.gobilda.GoBildaPinpointDriver;
+import com.qualcomm.hardware.limelightvision.LLResult;
+import com.qualcomm.hardware.limelightvision.LLResultTypes;
+import com.qualcomm.hardware.limelightvision.Limelight3A;
 import com.qualcomm.robotcore.eventloop.opmode.LinearOpMode;
 import com.qualcomm.robotcore.eventloop.opmode.TeleOp;
 import com.qualcomm.robotcore.hardware.DcMotor;
@@ -9,16 +12,19 @@ import com.qualcomm.robotcore.hardware.Servo;
 import com.qualcomm.robotcore.hardware.PwmControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
+import org.firstinspires.ftc.teamcode.vision.HiveAim;
 
 /**
  * GAMEPAD -> VIRTUAL TARGET POSE -> PD CONTROLLER -> YOUR ORIGINAL WHEEL MIXER
  *
  * The sticks change targetX, targetY, and targetHeading, not motor power.
  * Odometry measures the real pose. PD feedback makes the robot follow the target.
- * With centered sticks and LEFT BUMPER held, the robot holds the last target.
- * Release LEFT BUMPER to stop applying power and reset only the X/Y target.
- * Target heading starts at 0 degrees on INIT. ONLY right-stick X changes it.
- * Translating, releasing the bumper, and actual heading drift never change it.
+ * With centered sticks and gamepad 1 A held, the robot holds the last target.
+ * Release A to stop applying power and reset only the X/Y target.
+ * Target heading starts at 0 degrees on INIT. ONLY right-stick X changes it, or
+ * holding an aim button (gamepad 1 X: blue hives, B: red hives), which turns it
+ * toward that alliance's nearest hive seen by the Limelight and enables PD like A.
+ * Translating, releasing A, and actual heading drift never change it.
  *
  * Original hardware names are retained; joystick spelling is corrected.
  * Plate presets and intake controls are configured in Tele_debug_v1.java.
@@ -39,6 +45,21 @@ public class TeleOP_v1 extends LinearOpMode {
     private DcMotor rightback;
     private DcMotor rightfront;
     private GoBildaPinpointDriver odometry;
+    private Limelight3A limelight; // Optional: null if not configured.
+    private Servo cameraAngle;     // Optional: null if not configured.
+
+    // Aim button state. Hive indexes are HIVE_TAG_IDS rows (hive number - 1); -1 means none.
+    private double[][] hiveTagTx;   // [hive][tag] Limelight tx in degrees; NaN = not seen
+    private double[][] hiveTagArea; // [hive][tag] Limelight target area, % of image; NaN = not seen
+    private double[] hiveMiddleDeg; // angle to each hive's middle; NaN = cannot aim at it
+    private double scalePerRootArea = Double.NaN; // tag spacing for one-tag views; see HiveAim
+    private long lastFrameTime = -1;
+    private int nearestBlue = -1;
+    private int nearestRed = -1;
+    private int[] aimAlliance;      // BLUE_HIVES or RED_HIVES while its button is held, else null
+    private int aimHive = -1;
+    private long aimHiveSeenNanos;
+    private double aimGoalHeading = Double.NaN; // WORLD heading that faces the aimed hive
 
     // Edit Tele_debug_v1.java to change tuning, directions, timing, or diagnostics.
     // All original default values and drivetrain variable names are preserved.
@@ -104,6 +125,23 @@ public class TeleOP_v1 extends LinearOpMode {
                         Tele_debug_v1.PLATE_PWM_MIN_US, Tele_debug_v1.PLATE_PWM_MAX_US));
             }
             // No automatic plate move during INIT; the first preset selects its target.
+
+            Tele_debug_v1.validateAimSettings();
+            int hives = Tele_debug_v1.HIVE_TAG_IDS.length;
+            hiveTagTx = new double[hives][Tele_debug_v1.HIVE_TAG_POSITIONS_CM.length];
+            for (double[] tx : hiveTagTx) java.util.Arrays.fill(tx, Double.NaN);
+            hiveTagArea = new double[hives][Tele_debug_v1.HIVE_TAG_POSITIONS_CM.length];
+            hiveMiddleDeg = new double[hives];
+            java.util.Arrays.fill(hiveMiddleDeg, Double.NaN);
+            // The Limelight and camera servo are optional here: without them the
+            // aim button does nothing and the rest of TeleOp works as before.
+            limelight = hardwareMap.tryGet(Limelight3A.class, "limelight");
+            if (limelight != null) {
+                limelight.pipelineSwitch(Tele_debug_v1.LIMELIGHT_PIPELINE);
+                limelight.start();
+            }
+            cameraAngle = hardwareMap.tryGet(Servo.class, "Camera_angle");
+            if (cameraAngle != null) cameraAngle.setDirection(Tele_debug_v1.CAMERA_ANGLE_DIRECTION);
             // You confirmed your odometry already reports correctly. This code
             // does not overwrite pod resolution, offsets, or encoder directions.
             // If another OpMode configures those settings, copy its EXACT setup
@@ -117,6 +155,9 @@ public class TeleOP_v1 extends LinearOpMode {
             telemetry.setMsTransmissionInterval(Tele_debug_v1.TELEMETRY_INTERVAL_MS);
             while (!isStarted() && !isStopRequested()) {
                 odometry.update();
+                // Shows which hive tags are visible so their order can be checked.
+                updateAim(odometry.getHeading(AngleUnit.RADIANS), null);
+                reportAim();
                 Tele_debug_v1.reportInit(telemetry, odometry.getDeviceStatus(),
                         odometry.getPosX(DistanceUnit.CM), odometry.getPosY(DistanceUnit.CM),
                         odometry.getHeading(AngleUnit.DEGREES));
@@ -124,6 +165,8 @@ public class TeleOP_v1 extends LinearOpMode {
             }
             waitForStart();
             if (isStopRequested()) return;
+            // Tilt the Limelight toward the hive tags; no servo moves during INIT.
+            if (cameraAngle != null) cameraAngle.setPosition(Tele_debug_v1.AIM_CAMERA_ANGLE_POSITION);
 
             long previousTime = System.nanoTime();
             boolean tracking = false;
@@ -159,13 +202,24 @@ public class TeleOP_v1 extends LinearOpMode {
                     continue;
                 }
 
-                // Mechanisms remain usable while the drivetrain bumper is released.
+                // Blue wins if both aim buttons are held.
+                Gamepad aimGamepad = mechanismGamepad(Tele_debug_v1.AIM_GAMEPAD);
+                int[] aimHives = Tele_debug_v1.isPressed(aimGamepad, Tele_debug_v1.AIM_BLUE_BUTTON)
+                        ? Tele_debug_v1.BLUE_HIVES
+                        : Tele_debug_v1.isPressed(aimGamepad, Tele_debug_v1.AIM_RED_BUTTON)
+                        ? Tele_debug_v1.RED_HIVES : null;
+                boolean aimHeld = aimHives != null;
+                updateAim(heading, aimHives);
+
+                // Mechanisms remain usable while the drive button is released.
                 updateMechanisms();
                 Tele_debug_v1.reportMechanisms(telemetry, plateTargetDegrees, intake.getPower());
+                reportAim();
 
                 // Release means zero motor power, not position hold. BRAKE reduces
                 // coasting, but it is not a mechanical lock or an instantaneous stop.
-                if (!gamepad1.left_bumper) {
+                // Holding an aim button enables PD exactly like the drive button.
+                if (!Tele_debug_v1.isPressed(gamepad1, Tele_debug_v1.DRIVE_ENABLE_BUTTON) && !aimHeld) {
                     stopDrive();
                     resetTarget(x, y, heading);
                     tracking = false;
@@ -224,6 +278,14 @@ public class TeleOP_v1 extends LinearOpMode {
                 double targetVelocityY = 2*(commandSin * forwardSpeed + commandCos * leftSpeed);
                 // Pinpoint heading is CCW-positive; your rotation stick is CW-positive.
                 double targetAngularVelocity = 2*(-rotate * Tele_debug_v1.MAX_TURN_RAD_S);
+                // While a hive is aimed at, aiming replaces the right stick and turns the
+                // target toward the hive at the same maximum rate, 2 * MAX_TURN_RAD_S.
+                boolean aiming = aimHeld && !Double.isNaN(aimGoalHeading);
+                if (aiming) {
+                    double maxTurn = 2 * Tele_debug_v1.MAX_TURN_RAD_S;
+                    double remaining = wrap(aimGoalHeading - targetHeading);
+                    targetAngularVelocity = Math.max(-maxTurn, Math.min(maxTurn, remaining / dt));
+                }
 
                 // Integrate velocity to create the internal target pose.
                 // If the next step exceeds the lead limit, freeze translation
@@ -250,9 +312,9 @@ public class TeleOP_v1 extends LinearOpMode {
                         && nextAngleError >= oldAngleError;
                 if (rotationLimited) {
                     targetAngularVelocity = 0.0;
-                } else if (rotate != 0.0f) {
-                    // The only runtime assignment to targetHeading. Left-stick
-                    // input and measured heading never overwrite this target.
+                } else if (rotate != 0.0f || aiming) {
+                    // The only runtime assignment to targetHeading: the right stick or
+                    // the aim button. Left-stick input and heading drift never change it.
                     targetHeading = nextHeading;
                 }
 
@@ -283,7 +345,7 @@ public class TeleOP_v1 extends LinearOpMode {
                         + Tele_debug_v1.KD_POSITION * (targetVelocityY - velocityY);
                 double powerCCW = Tele_debug_v1.KP_HEADING * errorHeading
                         + Tele_debug_v1.KD_HEADING * (targetAngularVelocity - angularVelocity);
-                powerCCW = applyHeadingTolerance(powerCCW, errorHeading, rotate);
+                powerCCW = applyHeadingTolerance(powerCCW, errorHeading, rotate != 0.0f || aiming);
 
                 // Convert world correction back into the robot's current axes.
                 double forwardPower = cos * powerX + sin * powerY;
@@ -301,7 +363,101 @@ public class TeleOP_v1 extends LinearOpMode {
             // Also stop if an exception interrupts the control loop.
             if (intake != null) intake.setPower(0.0);
             stopDrive();
+            if (limelight != null) limelight.stop();
         }
+    }
+
+    /**
+     * Reads the newest Limelight frame and finds, for every hive, the angle to its
+     * middle from any of its visible tags. While an aim button is held, aims at one
+     * of that alliance's hives: the nearest usable one (largest average tag area),
+     * kept until it has been out of view for AIM_LOST_MS. Each fresh view of it sets
+     * aimGoalHeading. hives is BLUE_HIVES or RED_HIVES while its button is held,
+     * otherwise null.
+     */
+    private void updateAim(double heading, int[] hives) {
+        if (hives != aimAlliance) {
+            // Released, or switched to the other alliance's button: drop the old hive.
+            aimAlliance = hives;
+            aimHive = -1;
+            aimGoalHeading = Double.NaN;
+        }
+        if (limelight == null) return;
+        LLResult result = limelight.getLatestResult();
+        if (result == null || result.getControlHubTimeStamp() == lastFrameTime) return;
+        lastFrameTime = result.getControlHubTimeStamp();
+
+        for (int h = 0; h < hiveTagTx.length; h++) {
+            java.util.Arrays.fill(hiveTagTx[h], Double.NaN);
+            java.util.Arrays.fill(hiveTagArea[h], Double.NaN);
+        }
+        if (result.isValid() && result.getStaleness() <= Tele_debug_v1.LIMELIGHT_MAX_STALENESS_MS) {
+            for (LLResultTypes.FiducialResult tag : result.getFiducialResults()) {
+                for (int h = 0; h < hiveTagTx.length; h++) {
+                    int[] ids = Tele_debug_v1.HIVE_TAG_IDS[h];
+                    for (int i = 0; i < ids.length; i++) {
+                        if (ids[i] != tag.getFiducialId() || !Double.isNaN(hiveTagTx[h][i])) continue;
+                        hiveTagTx[h][i] = tag.getTargetXDegrees();
+                        hiveTagArea[h][i] = tag.getTargetArea();
+                    }
+                }
+            }
+        }
+
+        double[] positions = Tele_debug_v1.HIVE_TAG_POSITIONS_CM;
+        for (int h = 0; h < hiveTagTx.length; h++) {
+            // Any view of two or more tags measures the tag spacing for one-tag views.
+            double scale = HiveAim.scalePerRootArea(hiveTagTx[h], hiveTagArea[h], positions);
+            if (!Double.isNaN(scale)) scalePerRootArea = scale;
+        }
+        for (int h = 0; h < hiveTagTx.length; h++) {
+            hiveMiddleDeg[h] = HiveAim.middleDeg(hiveTagTx[h], hiveTagArea[h], positions, scalePerRootArea);
+        }
+        nearestBlue = nearestHive(Tele_debug_v1.BLUE_HIVES);
+        nearestRed = nearestHive(Tele_debug_v1.RED_HIVES);
+        if (hives == null) return;
+
+        int nearest = hives == Tele_debug_v1.BLUE_HIVES ? nearestBlue : nearestRed;
+        long now = System.nanoTime();
+        if (aimHive >= 0 && !Double.isNaN(hiveMiddleDeg[aimHive])) {
+            aimHiveSeenNanos = now;
+        } else if (aimHive < 0 || now - aimHiveSeenNanos > Tele_debug_v1.AIM_LOST_MS * 1_000_000L) {
+            aimHive = nearest;
+            aimHiveSeenNanos = now;
+        }
+        if (aimHive >= 0 && !Double.isNaN(hiveMiddleDeg[aimHive])) {
+            // tx > 0 means the hive is to the right, so turn clockwise (heading decreases).
+            double errorDeg = hiveMiddleDeg[aimHive] - Tele_debug_v1.AIM_OFFSET_DEG;
+            aimGoalHeading = wrap(heading - Tele_debug_v1.AIM_TURN_SIGN * Math.toRadians(errorDeg));
+        }
+    }
+
+    /** Index of the nearest listed hive that can be aimed at, or -1 if none. */
+    private int nearestHive(int[] hives) {
+        int nearest = -1;
+        double nearestArea = 0.0;
+        for (int hive : hives) {
+            int h = hive - 1;
+            if (Double.isNaN(hiveMiddleDeg[h])) continue;
+            // Closer tags look bigger, so the nearest hive has the largest average tag area.
+            double sumArea = 0.0;
+            for (double area : hiveTagArea[h]) {
+                if (!Double.isNaN(area)) sumArea += area;
+            }
+            double meanArea = sumArea / HiveAim.visibleCount(hiveTagTx[h]);
+            if (nearest < 0 || meanArea > nearestArea) {
+                nearest = h;
+                nearestArea = meanArea;
+            }
+        }
+        return nearest;
+    }
+
+    private void reportAim() {
+        String alliance = aimAlliance == null ? null
+                : aimAlliance == Tele_debug_v1.BLUE_HIVES ? "blue" : "red";
+        Tele_debug_v1.reportAim(telemetry, limelight != null, alliance, aimHive, nearestBlue, nearestRed,
+                hiveMiddleDeg, hiveTagTx, !Double.isNaN(scalePerRootArea));
     }
 
     private Gamepad mechanismGamepad(int number) {
@@ -343,14 +499,14 @@ public class TeleOP_v1 extends LinearOpMode {
         previousHeading = heading;
         velocityX = velocityY = angularVelocity = 0.0;
         headingSettled = false;
-        // Deliberately preserve targetHeading, even when the bumper is released.
+        // Deliberately preserve targetHeading, even when the drive button is released.
     }
 
-    private double applyHeadingTolerance(double powerCCW, double errorHeading, float rotate) {
+    private double applyHeadingTolerance(double powerCCW, double errorHeading, boolean turning) {
         double angleError = Math.abs(errorHeading);
         double turnRate = Math.abs(angularVelocity);
-        if (rotate != 0.0f) {
-            headingSettled = false; // Always respond to deliberate turning input.
+        if (turning) {
+            headingSettled = false; // Always respond to turning input and aiming.
         } else if (headingSettled) {
             if (angleError >= Tele_debug_v1.HEADING_RESUME_RAD || turnRate >= Tele_debug_v1.RESUME_TURN_RATE_RAD_S) {
                 headingSettled = false;
