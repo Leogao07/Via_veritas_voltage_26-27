@@ -127,13 +127,34 @@ Wi-Fi target with `adb -s 192.168.43.1:5555 install -r TeamCode/build/outputs/ap
 `192.168.43.1` is the default Control Hub address; if it does not connect, check
 the address on Driver Station's Program & Manage page.
 
+If `adb devices` shows `192.168.43.1:5555  offline` over Wi-Fi:
+
+1. Check that the Mac is still on the robot Wi-Fi: `ipconfig getifaddr en0` must
+   print an address starting with `192.168.43.`. If it does not, rejoin `32898-RC`
+   (see `Host is down` in the table below).
+2. Turn the robot's main power switch off, wait a few seconds, and turn it back on.
+   Use the power switch, not **Restart Robot** in the Driver Hub app; only a full
+   power cycle clears the stuck connection.
+3. Wait about 30-60 seconds for the Control Hub to start. Rejoin `32898-RC` if the
+   Mac dropped it, then run:
+
+   ```sh
+   adb disconnect 192.168.43.1:5555
+   adb kill-server
+   adb connect 192.168.43.1:5555
+   adb devices
+   ```
+
+4. Continue when the list shows `192.168.43.1:5555  device`.
+
 Common problems:
 
 | Message | Fix |
 | --- | --- |
 | `command not found: adb` | Check the `~/.zshrc` lines above and reopen VS Code. |
 | `adb devices` shows nothing | Check robot power and use a USB-C cable that carries data, not just charging. |
-| Wi-Fi: `offline`, `failed to connect`, or `Host is down` | The Mac is not on the robot Wi-Fi. The robot network has no internet, so macOS may switch back to another network by itself. Check that `ipconfig getifaddr en0` prints `192.168.43.x`; if it keeps switching, turn off Auto-Join for your other networks in System Settings > Wi-Fi. Then run `adb kill-server` and connect again. |
+| Wi-Fi: `failed to connect` or `Host is down` | The Mac is not on the robot Wi-Fi. The robot network has no internet, so macOS may switch back to another network by itself. Check that `ipconfig getifaddr en0` prints `192.168.43.x`; if it keeps switching, turn off Auto-Join for your other networks in System Settings > Wi-Fi. Then run `adb kill-server` and connect again. |
+| Wi-Fi: `offline` | Follow the steps above the table: check the Mac's Wi-Fi, power-cycle the robot with its power switch (not Restart Robot in the Driver Hub), then disconnect, `adb kill-server`, and connect again. |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures do not match` | The hub has an app signed with a different key, such as the factory-installed Robot Controller. Run `adb uninstall com.qualcomm.ftcrobotcontroller` once, then install again. Robot configurations in the hub's `FIRST` folder are kept. Builds from this repository share `libs/ftc.debug.keystore`, so teammates' builds replace each other without this step. |
 | `XXXX-DS does not match YYYY-RC` | The Driver Station and Control Hub names use different team numbers. Our team number is 32898, so the names must be `32898-DS` and `32898-RC`. Rename the wrong device from the Driver Station menu > Settings. |
 | `no voltage sensor` | No hardware configuration is active. Open Configure Robot and activate `2026-27`. |
@@ -239,7 +260,7 @@ be implemented and tested.
 | Gamepad 1 X / B | Hold to aim at the nearest blue / red hive. Also enables PD like the left trigger; the left stick still moves the robot. See [TeleOp hive aiming](#teleop-hive-aiming). |
 | Gamepad 2 Y / X / A / B | Select plate targets of 27 / 117 / 207 / 297 degrees. |
 | Gamepad 2 left / right bumper | Run the intake forward / reverse; release to stop. Forward takes priority if both are held. |
-| Gamepad 2 d-pad up / down | Tilt `Camera_angle` to 1.0 (aim position) / 0.85. See [Camera angle](#camera-angle). |
+| Gamepad 2 d-pad up / down | Tilt `Camera_angle` to 1.0 (aim position) / 0.77. See [Camera angle](#camera-angle). |
 
 These values describe the current code, not a hardware calibration. Tune settings in `Tele_debug_v1.java`. Releasing the left trigger resets the translation target and preserves the heading target.
 
@@ -257,7 +278,7 @@ the gamepad 2 d-pad, and it stays there until the other direction is pressed:
 | Gamepad 2 | Position | Use |
 | --- | --- | --- |
 | D-pad up | 1.0 (`AIM_CAMERA_ANGLE_POSITION`) | Looks at the hive tags. This is the position at START; use it for hive aiming. |
-| D-pad down | 0.85 (`CAMERA_ANGLE_DOWN_POSITION`) | Tilted down. The Limelight may not see the hive tags here, so press d-pad up before aiming with X / B. |
+| D-pad down | 0.77 (`CAMERA_ANGLE_DOWN_POSITION`) | Tilted down. The Limelight may not see the hive tags here, so press d-pad up before aiming with X / B. |
 
 The Driver Station shows the current choice, for example
 `Camera_angle (d-pad up / down): 1.00`, or `Not configured` when the active
@@ -334,7 +355,7 @@ settings at the top of `Tele_debug_v1.java`; the rest are in its HIVE AIMING sec
 | `AIM_TURN_SIGN` | `+1` | Set to `-1` only if aiming turns the robot away from the hive. |
 | `AIM_LOST_MS` | `500` | How long the chosen hive may be out of view before another is chosen. |
 | `AIM_CAMERA_ANGLE_POSITION` | `1.0` | `Camera_angle` up position (gamepad 2 d-pad up) and the position at START. |
-| `CAMERA_ANGLE_DOWN_POSITION` | `0.85` | `Camera_angle` down position (gamepad 2 d-pad down). |
+| `CAMERA_ANGLE_DOWN_POSITION` | `0.77` | `Camera_angle` down position (gamepad 2 d-pad down). |
 | `CAMERA_GAMEPAD`, `CAMERA_UP_BUTTON`, `CAMERA_DOWN_BUTTON` | `2`, `DPAD_UP`, `DPAD_DOWN` | Gamepad and buttons that choose the `Camera_angle` position. |
 
 #### Aiming telemetry
@@ -443,5 +464,5 @@ Use the current official manual and team updates when making game-specific decis
 - Right bumper drive enable (since replaced by the left trigger), `Camera_angle`
   hold, and Limelight web tuning through the Control Hub: tested on the robot on
   November 2, 2026.
-- Left trigger drive enable and gamepad 2 d-pad `Camera_angle` control (1.0 / 0.85):
-  compiled on November 2, 2026; not yet tested on the robot.
+- Left trigger drive enable and gamepad 2 d-pad `Camera_angle` control (1.0 / 0.77):
+  tested on the robot on November 2, 2026.

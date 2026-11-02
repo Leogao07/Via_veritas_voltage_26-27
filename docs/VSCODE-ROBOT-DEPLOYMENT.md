@@ -211,7 +211,7 @@ adb -s ACTUAL_SERIAL install -r "TeamCode/build/outputs/apk/debug/TeamCode-debug
    do not yet trigger automatic actions. It does not control `Flywheel`,
    `elevator`, or `Spoon`; their control settings and gamepad assignments remain
    to be specified. For hive aiming it reads `limelight`, and it holds
-   `Camera_angle` at 1.0 or 0.85 (chosen with the gamepad 2 d-pad) from START to STOP.
+   `Camera_angle` at 1.0 or 0.77 (chosen with the gamepad 2 d-pad) from START to STOP.
 3. Before running, complete the [robot checks](SDK-INTEGRATION.md#before-robot-operation),
    including motor direction, Pinpoint pod configuration, and plate servo limits.
    Support the robot with its drive wheels clear and keep mechanisms clear.
@@ -234,7 +234,7 @@ Current controls:
 | Gamepad 1 X / B | Hold to aim at the nearest blue / red hive; also enables PD. See the [README](../README.md#teleop-hive-aiming). |
 | Gamepad 2 Y / X / A / B | Plate targets: 27 / 117 / 207 / 297 degrees |
 | Gamepad 2 left / right bumper | Intake forward / reverse; release to stop |
-| Gamepad 2 d-pad up / down | `Camera_angle` to 1.0 (aim position) / 0.85 |
+| Gamepad 2 d-pad up / down | `Camera_angle` to 1.0 (aim position) / 0.77 |
 
 To tune the Limelight's pipelines from a laptop, run `TeleOP_v1` or
 `Limelight_tuning`, join the robot Wi-Fi (`32898-RC`), and open
@@ -310,7 +310,7 @@ install anything on the robot.
 | SDK location not found | Set `ANDROID_HOME` to SDK Manager's actual path or let Android Studio generate `local.properties`. |
 | Missing SDK package / license error | Install the exact packages in section 2 and accept licenses through SDK Manager. |
 | No device in `adb devices` | Verify the terminal is local, Hub power, USB-C port, data cable, and Windows driver if applicable. |
-| `offline` | Wait for startup; reconnect the cable. If needed run `adb kill-server`, then `adb start-server`, and check again. |
+| `offline` | USB: wait for startup and reconnect the cable; if needed run `adb kill-server`, then `adb start-server`, and check again. Wi-Fi: power-cycle the robot with its power switch (not Restart Robot in the Driver Hub), then run `adb disconnect 192.168.43.1:5555`, `adb kill-server`, `adb connect 192.168.43.1:5555`, and `adb devices`; see the [README](../README.md#quick-start-connect-to-the-robot-from-vs-code-on-a-mac). |
 | `unauthorized` | Complete the controller's debugging authorization before installing. |
 | More than one device | Select a serial with `adb -s ACTUAL_SERIAL install -r ...` as shown above. |
 | Signature / version conflict during install | Check the installed RC app and team's SDK/signing setup; coordinate recovery before uninstalling, which can remove app data. |

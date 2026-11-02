@@ -210,7 +210,7 @@ public final class Tele_debug_v1 {
     // matches CAMERA_ANGLE_UP_POSITION in the Auto settings files. Skipped if
     // "Camera_angle" is not in the configuration.
     public static final double AIM_CAMERA_ANGLE_POSITION = 1.0;
-    public static final double CAMERA_ANGLE_DOWN_POSITION = 0.85;
+    public static final double CAMERA_ANGLE_DOWN_POSITION = 0.77;
     public static final Servo.Direction CAMERA_ANGLE_DIRECTION = Servo.Direction.FORWARD;
     public static final int CAMERA_GAMEPAD = 2;
     public static final Button CAMERA_UP_BUTTON = Button.DPAD_UP;
