@@ -9,13 +9,16 @@ robot controller App. The team's TeleOp program and tuning helper are
 `org.firstinspires.ftc.teamcode.teleop`. The Auto execution file and tuning helper
 are [auto/auto_V1.java](auto/auto_V1.java) and
 [auto/auto_debug_V1.java](auto/auto_debug_V1.java), using the package
-`org.firstinspires.ftc.teamcode.auto`. The hive aiming math that TeleOp uses is
-[vision/HiveAim.java](vision/HiveAim.java), in the package
-`org.firstinspires.ftc.teamcode.vision`.
+`org.firstinspires.ftc.teamcode.auto`. The Limelight code is in `vision/` (package
+`org.firstinspires.ftc.teamcode.vision`): the hive aiming math
+[vision/HiveAim.java](vision/HiveAim.java), the port forwarder
+[vision/LimelightPortForwarder.java](vision/LimelightPortForwarder.java), and the
+`Limelight_tuning` OpMode [vision/LimelightTuning.java](vision/LimelightTuning.java).
 
 Each execution file contains its mode's control logic; its Debug helper supplies
 the adjustable settings. Rebuild and install after changing either file. Only
-`auto_V1` and `TeleOP_v1` are selectable OpModes; the Debug helpers are not.
+`auto_V1`, `TeleOP_v1`, and `Limelight_tuning` are selectable OpModes; the Debug
+helpers are not.
 The current Auto scaffold waits for START and finishes without commanding
 hardware; its route actions have not been implemented yet.
 

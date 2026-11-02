@@ -37,7 +37,7 @@ public final class Tele_debug_v1 {
     public static final double TRIGGER_BUTTON_THRESHOLD = 0.5;
 
     // Gamepad 1 button held to enable PD driving; release it once after START.
-    public static final Button DRIVE_ENABLE_BUTTON = Button.A;
+    public static final Button DRIVE_ENABLE_BUTTON = Button.RIGHT_BUMPER;
 
     public static final int PLATE_GAMEPAD = 2;
     public static final Button PLATE_PRESET_1_BUTTON = Button.Y;
@@ -173,6 +173,11 @@ public final class Tele_debug_v1 {
     // Limelight pipeline index configured as an AprilTag (fiducial) pipeline.
     public static final int LIMELIGHT_PIPELINE = 0;
 
+    // true: TeleOp INIT starts LimelightPortForwarder, so a laptop on the robot Wi-Fi
+    // can open the Limelight web interface at http://192.168.43.1:5801 and tune
+    // pipelines while TeleOp runs. Set false if it should not be reachable.
+    public static final boolean LIMELIGHT_PORT_FORWARDING = true;
+
     // Ignore Limelight results older than this many milliseconds.
     public static final long LIMELIGHT_MAX_STALENESS_MS = 100;
 
@@ -190,9 +195,10 @@ public final class Tele_debug_v1 {
     // holds the last aimed heading meanwhile.
     public static final long AIM_LOST_MS = 500;
 
-    // Camera_angle servo position (0..1) set at START so the Limelight looks at the
-    // hive tags. Matches CAMERA_ANGLE_UP_POSITION in the Auto settings files.
-    // Skipped if "Camera_angle" is not in the configuration.
+    // Camera_angle servo position (0..1), commanded on every TeleOp loop from START
+    // to STOP so the Limelight always looks at the hive tags. Matches
+    // CAMERA_ANGLE_UP_POSITION in the Auto settings files. Skipped if
+    // "Camera_angle" is not in the configuration.
     public static final double AIM_CAMERA_ANGLE_POSITION = 1.0;
     public static final Servo.Direction CAMERA_ANGLE_DIRECTION = Servo.Direction.FORWARD;
 
