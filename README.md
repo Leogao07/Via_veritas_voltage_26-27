@@ -7,6 +7,10 @@ This repository belongs to `Leogao07` and provides a shared starting point for r
 New to the team or to programming? Start with [A Note for New Team Members](notefornew.md)
 for a welcome, a file map, and a suggested reading order.
 
+Tuning the Limelight? Run `TeleOP_v1` or `Limelight_tuning`, join the laptop to the
+robot Wi-Fi (`32898-RC`), and open **http://192.168.43.1:5801**. See
+[Tune the Limelight from a laptop](#tune-the-limelight-from-a-laptop).
+
 ## FTC Android Studio project
 
 This repository includes the official FTC Robot Controller **v12.0** project and
@@ -199,8 +203,9 @@ The current OpMode preserves the existing Pinpoint pod configuration. If another
 `limelight` is the Limelight 3A camera. These names and device types are recorded
 for the hardware configuration. The current `TeleOP_v1.java` does not control
 `Flywheel`, `elevator`, or `Spoon`. For [hive aiming](#teleop-hive-aiming) it reads
-`limelight` and holds `Camera_angle` at its aim position from START to STOP; both are
-optional, and TeleOp still runs if either is missing from the configuration.
+`limelight`, and from START to STOP it holds `Camera_angle` at the position chosen
+with the gamepad 2 d-pad (see [Camera angle](#camera-angle)). Both are optional,
+and TeleOp still runs if either is missing from the configuration.
 Models, hub/port assignments, motor directions and power settings, servo ranges
 and starting positions, and the remaining driver controls have not been specified yet.
 
@@ -228,14 +233,35 @@ be implemented and tested.
 
 | Input | Action |
 | --- | --- |
-| Gamepad 1 right bumper | Release after starting, then hold to enable PD driving. Releasing stops drive power. |
+| Gamepad 1 left trigger | Release after starting, then press to enable PD driving; any press counts. Releasing it fully stops drive power. |
 | Gamepad 1 left stick | Move the virtual translation target using the target heading as the reference. |
 | Gamepad 1 right-stick X | Change the target heading. |
-| Gamepad 1 X / B | Hold to aim at the nearest blue / red hive. Also enables PD like the right bumper; the left stick still moves the robot. See [TeleOp hive aiming](#teleop-hive-aiming). |
+| Gamepad 1 X / B | Hold to aim at the nearest blue / red hive. Also enables PD like the left trigger; the left stick still moves the robot. See [TeleOp hive aiming](#teleop-hive-aiming). |
 | Gamepad 2 Y / X / A / B | Select plate targets of 27 / 117 / 207 / 297 degrees. |
 | Gamepad 2 left / right bumper | Run the intake forward / reverse; release to stop. Forward takes priority if both are held. |
+| Gamepad 2 d-pad up / down | Tilt `Camera_angle` to 1.0 (aim position) / 0.85. See [Camera angle](#camera-angle). |
 
-These values describe the current code, not a hardware calibration. Tune settings in `Tele_debug_v1.java`. Releasing the right bumper resets the translation target and preserves the heading target.
+These values describe the current code, not a hardware calibration. Tune settings in `Tele_debug_v1.java`. Releasing the left trigger resets the translation target and preserves the heading target.
+
+The left trigger counts as pressed as soon as it moves at all
+(`TRIGGER_BUTTON_THRESHOLD = 0.0`). If a gamepad's trigger does not rest at exactly
+0, the robot never leaves the startup release check and the Driver Station keeps
+asking to release `LEFT_TRIGGER`; raise the threshold slightly, for example to 0.05.
+
+### Camera angle
+
+`Camera_angle` tilts the Limelight. TeleOp sets it at START and holds it on every
+loop until STOP; it never moves during INIT. The operator picks the position with
+the gamepad 2 d-pad, and it stays there until the other direction is pressed:
+
+| Gamepad 2 | Position | Use |
+| --- | --- | --- |
+| D-pad up | 1.0 (`AIM_CAMERA_ANGLE_POSITION`) | Looks at the hive tags. This is the position at START; use it for hive aiming. |
+| D-pad down | 0.85 (`CAMERA_ANGLE_DOWN_POSITION`) | Tilted down. The Limelight may not see the hive tags here, so press d-pad up before aiming with X / B. |
+
+The Driver Station shows the current choice, for example
+`Camera_angle (d-pad up / down): 1.00`, or `Not configured` when the active
+configuration has no `Camera_angle`.
 
 ### TeleOp hive aiming
 
@@ -244,7 +270,7 @@ the nearest red hive. The robot turns until the middle of that hive is straight
 ahead of the Limelight and keeps tracking it while the button is held. Release
 the button to return to normal driving.
 
-- Holding X or B also enables PD driving, like holding the right bumper: the
+- Holding X or B also enables PD driving, like pressing the left trigger: the
   robot holds its position and the left stick still moves it, while aiming
   replaces the right stick. If both buttons are held, blue wins.
 - The nearest hive is the one whose visible tags look biggest. The robot stays on
@@ -252,10 +278,10 @@ the button to return to normal driving.
   the nearest visible hive of the same color is chosen instead. Meanwhile the
   robot holds its last aimed heading.
 - Aiming turns at up to TeleOp's normal maximum turn rate, about 110°/s.
-- From START to STOP, TeleOp holds `Camera_angle` at its aim position (1.0) so the
-  Limelight always looks at the tags; it does not move during INIT. Without a
-  `limelight` in the configuration, X and B do nothing and the rest of TeleOp
-  works as before.
+- Aim with the camera up: `Camera_angle` starts at its aim position (1.0), and
+  gamepad 2 d-pad up returns it there if it was moved down
+  (see [Camera angle](#camera-angle)). Without a `limelight` in the configuration,
+  X and B do nothing and the rest of TeleOp works as before.
 
 #### Hives and their tags
 
@@ -290,12 +316,13 @@ increase from left to right, that view is ignored.
 
 #### Aiming settings
 
-`DRIVE_ENABLE_BUTTON` is with the other button settings at the top of
-`Tele_debug_v1.java`; the rest are in its HIVE AIMING section.
+`DRIVE_ENABLE_BUTTON` and `TRIGGER_BUTTON_THRESHOLD` are with the other button
+settings at the top of `Tele_debug_v1.java`; the rest are in its HIVE AIMING section.
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
-| `DRIVE_ENABLE_BUTTON` | `RIGHT_BUMPER` | Gamepad 1 button held to enable PD driving. |
+| `DRIVE_ENABLE_BUTTON` | `LEFT_TRIGGER` | Gamepad 1 button or trigger that enables PD driving while pressed. |
+| `TRIGGER_BUTTON_THRESHOLD` | `0.0` | A trigger counts as pressed above this value; 0.0 means any press. Raise to about 0.05 if a trigger does not rest at 0. |
 | `AIM_GAMEPAD`, `AIM_BLUE_BUTTON`, `AIM_RED_BUTTON` | `1`, `X`, `B` | Gamepad and buttons that aim at blue and red hives. |
 | `HIVE_TAG_IDS` | the table above | Each hive's tag IDs, left to right. Empty rows are ignored. |
 | `BLUE_HIVES`, `RED_HIVES` | `{1, 2}`, `{3, 4}` | Hive numbers (rows of `HIVE_TAG_IDS`, counting from 1) that each button tracks. |
@@ -306,7 +333,9 @@ increase from left to right, that view is ignored.
 | `AIM_OFFSET_DEG` | `0` | Moves the aim point; positive aims to the robot's right. Use it if the camera or shooter is off the robot's centerline. |
 | `AIM_TURN_SIGN` | `+1` | Set to `-1` only if aiming turns the robot away from the hive. |
 | `AIM_LOST_MS` | `500` | How long the chosen hive may be out of view before another is chosen. |
-| `AIM_CAMERA_ANGLE_POSITION` | `1.0` | `Camera_angle` servo position, held on every TeleOp loop from START to STOP. |
+| `AIM_CAMERA_ANGLE_POSITION` | `1.0` | `Camera_angle` up position (gamepad 2 d-pad up) and the position at START. |
+| `CAMERA_ANGLE_DOWN_POSITION` | `0.85` | `Camera_angle` down position (gamepad 2 d-pad down). |
+| `CAMERA_GAMEPAD`, `CAMERA_UP_BUTTON`, `CAMERA_DOWN_BUTTON` | `2`, `DPAD_UP`, `DPAD_DOWN` | Gamepad and buttons that choose the `Camera_angle` position. |
 
 #### Aiming telemetry
 
@@ -333,6 +362,9 @@ increase from left to right, that view is ignored.
 
 ### Tune the Limelight from a laptop
 
+**Quick version:** run `TeleOP_v1` or `Limelight_tuning`, join the laptop to the
+robot Wi-Fi (`32898-RC`), and open **http://192.168.43.1:5801**.
+
 The Limelight 3A is plugged into the Control Hub's USB port, where only the hub can
 reach it (at `172.29.0.1`). `vision/LimelightPortForwarder.java` runs on the
 Control Hub and passes ports 5800-5809 (camera stream, web interface, and live
@@ -346,8 +378,8 @@ Limelight web interface and tune pipelines without unplugging anything.
    - `Limelight_tuning` (TeleOp list, Tuning group): INIT starts forwarding and
      shows the active pipeline and every AprilTag in view, left to right, with its
      hive number, `tx`, `ty`, and area. It never drives the robot; after START it
-     holds `Camera_angle` at the TeleOp aim position so the camera sees what
-     TeleOp sees.
+     holds `Camera_angle` at the TeleOp aim position (1.0) so the camera sees
+     what TeleOp aiming sees.
 2. Join the laptop to the robot Wi-Fi (`32898-RC`) and open
    **http://192.168.43.1:5801** in a browser.
 3. Tune **pipeline 0**, the AprilTag pipeline that TeleOp switches to
@@ -408,5 +440,8 @@ Use the current official manual and team updates when making game-specific decis
 - GitHub Actions APK build: [passed for commit `ec9cf0c`](https://github.com/Leogao07/Via_veritas_voltage_26-27/actions/runs/39948262006).
 - Robot testing: not performed as part of repository setup.
 - TeleOp hive aiming: blue and red hive tracking tested on the robot on October 30, 2026.
-- Right bumper drive enable, `Camera_angle` hold, and Limelight web tuning through
-  the Control Hub: tested on the robot on November 2, 2026.
+- Right bumper drive enable (since replaced by the left trigger), `Camera_angle`
+  hold, and Limelight web tuning through the Control Hub: tested on the robot on
+  November 2, 2026.
+- Left trigger drive enable and gamepad 2 d-pad `Camera_angle` control (1.0 / 0.85):
+  compiled on November 2, 2026; not yet tested on the robot.

@@ -34,10 +34,14 @@ public final class Tele_debug_v1 {
         DPAD_UP, DPAD_DOWN, DPAD_LEFT, DPAD_RIGHT,
         LEFT_STICK_BUTTON, RIGHT_STICK_BUTTON, LEFT_TRIGGER, RIGHT_TRIGGER
     }
-    public static final double TRIGGER_BUTTON_THRESHOLD = 0.5;
+    // Unit: trigger travel, 0 (released) to 1 (fully pressed). A trigger counts as
+    // pressed above this value, so 0.0 means any press at all. Raise it slightly,
+    // for example to 0.05, only if a trigger does not rest at exactly 0.
+    public static final double TRIGGER_BUTTON_THRESHOLD = 0.0;
 
     // Gamepad 1 button held to enable PD driving; release it once after START.
-    public static final Button DRIVE_ENABLE_BUTTON = Button.RIGHT_BUMPER;
+    // The left trigger enables driving as soon as it is pressed at all.
+    public static final Button DRIVE_ENABLE_BUTTON = Button.LEFT_TRIGGER;
 
     public static final int PLATE_GAMEPAD = 2;
     public static final Button PLATE_PRESET_1_BUTTON = Button.Y;
@@ -125,11 +129,15 @@ public final class Tele_debug_v1 {
         return !Double.isNaN(value) && !Double.isInfinite(value);
     }
 
-    public static void reportMechanisms(Telemetry telemetry, double plateTargetDegrees, double intakePower) {
+    // cameraAngleTarget is NaN when "Camera_angle" is not in the configuration.
+    public static void reportMechanisms(Telemetry telemetry, double plateTargetDegrees, double intakePower,
+                                        double cameraAngleTarget) {
         // Servo target only: standard servo API provides no measured angle feedback.
         telemetry.addData("Plate target (deg)", Double.isNaN(plateTargetDegrees)
                 ? "No preset selected" : String.format(java.util.Locale.US, "%.1f", plateTargetDegrees));
         telemetry.addData("Intake power", intakePower);
+        telemetry.addData("Camera_angle (d-pad up / down)", Double.isNaN(cameraAngleTarget)
+                ? "Not configured" : String.format(java.util.Locale.US, "%.2f", cameraAngleTarget));
     }
 
     // ==================== HIVE AIMING (LIMELIGHT) ====================
@@ -195,12 +203,18 @@ public final class Tele_debug_v1 {
     // holds the last aimed heading meanwhile.
     public static final long AIM_LOST_MS = 500;
 
-    // Camera_angle servo position (0..1), commanded on every TeleOp loop from START
-    // to STOP so the Limelight always looks at the hive tags. Matches
-    // CAMERA_ANGLE_UP_POSITION in the Auto settings files. Skipped if
+    // Camera_angle servo positions (0..1). TeleOp starts at AIM_CAMERA_ANGLE_POSITION,
+    // where the Limelight looks at the hive tags; CAMERA_UP_BUTTON returns to it and
+    // CAMERA_DOWN_BUTTON tilts to CAMERA_ANGLE_DOWN_POSITION. The chosen position is
+    // commanded on every TeleOp loop from START to STOP. AIM_CAMERA_ANGLE_POSITION
+    // matches CAMERA_ANGLE_UP_POSITION in the Auto settings files. Skipped if
     // "Camera_angle" is not in the configuration.
     public static final double AIM_CAMERA_ANGLE_POSITION = 1.0;
+    public static final double CAMERA_ANGLE_DOWN_POSITION = 0.85;
     public static final Servo.Direction CAMERA_ANGLE_DIRECTION = Servo.Direction.FORWARD;
+    public static final int CAMERA_GAMEPAD = 2;
+    public static final Button CAMERA_UP_BUTTON = Button.DPAD_UP;
+    public static final Button CAMERA_DOWN_BUTTON = Button.DPAD_DOWN;
 
     public static void validateAimSettings() {
         if (AIM_GAMEPAD != 1 && AIM_GAMEPAD != 2) {
@@ -234,9 +248,13 @@ public final class Tele_debug_v1 {
         if (!validNumber(AIM_OFFSET_DEG) || AIM_LOST_MS < 0) {
             throw new IllegalArgumentException("AIM_OFFSET_DEG must be finite and AIM_LOST_MS nonnegative");
         }
-        if (!validNumber(AIM_CAMERA_ANGLE_POSITION)
-                || AIM_CAMERA_ANGLE_POSITION < 0.0 || AIM_CAMERA_ANGLE_POSITION > 1.0) {
-            throw new IllegalArgumentException("AIM_CAMERA_ANGLE_POSITION must be within 0..1");
+        for (double position : new double[] {AIM_CAMERA_ANGLE_POSITION, CAMERA_ANGLE_DOWN_POSITION}) {
+            if (!validNumber(position) || position < 0.0 || position > 1.0) {
+                throw new IllegalArgumentException("Camera_angle positions must be within 0..1");
+            }
+        }
+        if ((CAMERA_GAMEPAD != 1 && CAMERA_GAMEPAD != 2) || CAMERA_UP_BUTTON == CAMERA_DOWN_BUTTON) {
+            throw new IllegalArgumentException("CAMERA_GAMEPAD must be 1 or 2 and the camera buttons different");
         }
     }
 

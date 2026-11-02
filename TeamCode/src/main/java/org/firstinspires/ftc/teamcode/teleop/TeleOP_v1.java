@@ -20,13 +20,15 @@ import org.firstinspires.ftc.teamcode.vision.LimelightPortForwarder;
  *
  * The sticks change targetX, targetY, and targetHeading, not motor power.
  * Odometry measures the real pose. PD feedback makes the robot follow the target.
- * With centered sticks and the gamepad 1 right bumper held, the robot holds the
+ * With centered sticks and the gamepad 1 left trigger pressed, the robot holds the
  * last target. Release it to stop applying power and reset only the X/Y target.
  * Target heading starts at 0 degrees on INIT. ONLY right-stick X changes it, or
  * holding an aim button (gamepad 1 X: blue hives, B: red hives), which turns it
  * toward that alliance's nearest hive seen by the Limelight and also enables PD.
- * Translating, releasing the right bumper, and actual heading drift never change it.
- * From START to STOP, Camera_angle is held at AIM_CAMERA_ANGLE_POSITION.
+ * Translating, releasing the left trigger, and actual heading drift never change it.
+ * From START to STOP, Camera_angle is held at the position chosen with the gamepad 2
+ * d-pad: up = AIM_CAMERA_ANGLE_POSITION (the starting position), down =
+ * CAMERA_ANGLE_DOWN_POSITION.
  *
  * Original hardware names are retained; joystick spelling is corrected.
  * Plate presets and intake controls are configured in Tele_debug_v1.java.
@@ -49,6 +51,7 @@ public class TeleOP_v1 extends LinearOpMode {
     private GoBildaPinpointDriver odometry;
     private Limelight3A limelight; // Optional: null if not configured.
     private Servo cameraAngle;     // Optional: null if not configured.
+    private double cameraAngleTarget = Tele_debug_v1.AIM_CAMERA_ANGLE_POSITION;
 
     // Aim button state. Hive indexes are HIVE_TAG_IDS rows (hive number - 1); -1 means none.
     private double[][] hiveTagTx;   // [hive][tag] Limelight tx in degrees; NaN = not seen
@@ -180,9 +183,15 @@ public class TeleOP_v1 extends LinearOpMode {
             String fault = "";
 
             while (opModeIsActive()) {
-                // Keep the Limelight tilted toward the hive tags for all of TeleOp,
-                // even while driving is disabled. No servo moves during INIT.
-                if (cameraAngle != null) cameraAngle.setPosition(Tele_debug_v1.AIM_CAMERA_ANGLE_POSITION);
+                // The gamepad 2 d-pad picks the Limelight tilt; the choice is held on
+                // every loop, even while driving is disabled. No servo moves during INIT.
+                Gamepad cameraGamepad = mechanismGamepad(Tele_debug_v1.CAMERA_GAMEPAD);
+                if (Tele_debug_v1.isPressed(cameraGamepad, Tele_debug_v1.CAMERA_UP_BUTTON)) {
+                    cameraAngleTarget = Tele_debug_v1.AIM_CAMERA_ANGLE_POSITION;
+                } else if (Tele_debug_v1.isPressed(cameraGamepad, Tele_debug_v1.CAMERA_DOWN_BUTTON)) {
+                    cameraAngleTarget = Tele_debug_v1.CAMERA_ANGLE_DOWN_POSITION;
+                }
+                if (cameraAngle != null) cameraAngle.setPosition(cameraAngleTarget);
 
                 // Always read the complete odometry pose BEFORE computing power.
                 odometry.update();
@@ -202,7 +211,7 @@ public class TeleOP_v1 extends LinearOpMode {
                 boolean timingOK = dt > 0.0 && dt <= Tele_debug_v1.MAX_LOOP_SECONDS;
                 if (!poseOK || !timingOK) {
                     intake.setPower(0.0);
-                    Tele_debug_v1.reportMechanisms(telemetry, plateTargetDegrees, intake.getPower());
+                    reportMechanisms();
                     fault = !poseOK ? "Odometry not ready / invalid pose" : "Control loop delayed";
                     requireRelease = true;
                     tracking = false;
@@ -223,7 +232,7 @@ public class TeleOP_v1 extends LinearOpMode {
 
                 // Mechanisms remain usable while the drive button is released.
                 updateMechanisms();
-                Tele_debug_v1.reportMechanisms(telemetry, plateTargetDegrees, intake.getPower());
+                reportMechanisms();
                 reportAim();
 
                 // Release means zero motor power, not position hold. BRAKE reduces
@@ -334,7 +343,7 @@ public class TeleOP_v1 extends LinearOpMode {
                 if (Math.hypot(errorX, errorY) > Tele_debug_v1.STOP_ERROR_CM
                         || Math.abs(errorHeading) > Tele_debug_v1.STOP_ERROR_RAD) {
                     intake.setPower(0.0);
-                    Tele_debug_v1.reportMechanisms(telemetry, plateTargetDegrees, intake.getPower());
+                    reportMechanisms();
                     fault = "Tracking error too large";
                     stopDrive();
                     requireRelease = true;
@@ -468,6 +477,11 @@ public class TeleOP_v1 extends LinearOpMode {
                 : aimAlliance == Tele_debug_v1.BLUE_HIVES ? "blue" : "red";
         Tele_debug_v1.reportAim(telemetry, limelight != null, alliance, aimHive, nearestBlue, nearestRed,
                 hiveMiddleDeg, hiveTagTx, !Double.isNaN(scalePerRootArea));
+    }
+
+    private void reportMechanisms() {
+        Tele_debug_v1.reportMechanisms(telemetry, plateTargetDegrees, intake.getPower(),
+                cameraAngle == null ? Double.NaN : cameraAngleTarget);
     }
 
     private Gamepad mechanismGamepad(int number) {

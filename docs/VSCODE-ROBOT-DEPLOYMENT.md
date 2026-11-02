@@ -210,31 +210,35 @@ adb -s ACTUAL_SERIAL install -r "TeamCode/build/outputs/apk/debug/TeamCode-debug
    record every port assignment. The current OpMode does not read either distance sensor, so they
    do not yet trigger automatic actions. It does not control `Flywheel`,
    `elevator`, or `Spoon`; their control settings and gamepad assignments remain
-   to be specified. For hive aiming it reads `limelight` and holds `Camera_angle`
-   at its aim position from START to STOP.
+   to be specified. For hive aiming it reads `limelight`, and it holds
+   `Camera_angle` at 1.0 or 0.85 (chosen with the gamepad 2 d-pad) from START to STOP.
 3. Before running, complete the [robot checks](SDK-INTEGRATION.md#before-robot-operation),
    including motor direction, Pinpoint pod configuration, and plate servo limits.
    Support the robot with its drive wheels clear and keep mechanisms clear.
    INIT can initialize hardware, so prepare before pressing it.
 4. Assign the gamepads in Driver Station. In the TeleOp list select `TeleOP_v1`,
    press **INIT**, inspect telemetry/errors, and then press **START**.
-5. Release gamepad 1's right bumper after starting, then hold it to enable driving.
-   Use small stick movements initially. Releasing the right bumper stops drive power.
-   Centered sticks with the right bumper held can still command pose corrections.
+5. Release gamepad 1's left trigger after starting, then press it to enable driving;
+   any press counts. Use small stick movements initially. Releasing the trigger
+   fully stops drive power. Centered sticks with the trigger pressed can still
+   command pose corrections.
 6. Test each mechanism separately, then use **STOP** when finished.
 
 Current controls:
 
 | Input | Action |
 | --- | --- |
-| Gamepad 1 right bumper | Hold to enable PD driving after the startup release |
+| Gamepad 1 left trigger | Press (any amount) to enable PD driving after the startup release |
 | Gamepad 1 left stick | Move the virtual translation target |
 | Gamepad 1 right-stick X | Change target heading |
 | Gamepad 1 X / B | Hold to aim at the nearest blue / red hive; also enables PD. See the [README](../README.md#teleop-hive-aiming). |
 | Gamepad 2 Y / X / A / B | Plate targets: 27 / 117 / 207 / 297 degrees |
 | Gamepad 2 left / right bumper | Intake forward / reverse; release to stop |
+| Gamepad 2 d-pad up / down | `Camera_angle` to 1.0 (aim position) / 0.85 |
 
-To tune the Limelight's pipelines from a laptop on the robot Wi-Fi, see
+To tune the Limelight's pipelines from a laptop, run `TeleOP_v1` or
+`Limelight_tuning`, join the robot Wi-Fi (`32898-RC`), and open
+http://192.168.43.1:5801; see
 [Tune the Limelight from a laptop](../README.md#tune-the-limelight-from-a-laptop).
 
 These preset values are code settings, not verified mechanical calibration. Build
@@ -312,7 +316,7 @@ install anything on the robot.
 | Signature / version conflict during install | Check the installed RC app and team's SDK/signing setup; coordinate recovery before uninstalling, which can remove app data. |
 | `TeleOP_v1` missing | Confirm installation succeeded on the intended Control Hub and Robot Controller restarted; verify you built the branch containing the OpMode. |
 | Hardware lookup error during INIT | Check the active configuration's exact names and device types against section 5. |
-| Robot does not drive after START | Check gamepad assignment; release then hold gamepad 1 right bumper, inspect telemetry and Pinpoint feedback. |
+| Robot does not drive after START | Check gamepad assignment; release then press gamepad 1 left trigger, inspect telemetry and Pinpoint feedback. |
 | Wi-Fi ADB cannot connect | Check the computer's robot Wi-Fi connection (macOS may switch back to a network with internet; turn off Auto-Join for other networks) and actual Program & Manage address; try USB again. |
 
 ## References and verification
