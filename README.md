@@ -21,6 +21,8 @@ Upstream: https://github.com/FIRST-Tech-Challenge/FtcRobotController/releases/ta
 | `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/TeleOP_v1.java` | Team TeleOp: Pinpoint pose feedback, PD driving, intake, plate presets, and hive aiming (hold X blue, B red). |
 | `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/teleop/Tele_debug_v1.java` | Compile-time settings, including the hive tag IDs for aiming, and Driver Station diagnostics. |
 | `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/vision/HiveAim.java` | Aiming math: finds the middle of a hive from the Limelight angles of its visible AprilTags. Used by TeleOp. |
+| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/vision/LimelightPortForwarder.java` | Forwards the Limelight 3A's ports through the Control Hub, so a laptop on the robot Wi-Fi can tune pipelines. |
+| `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/vision/LimelightTuning.java` | `Limelight_tuning` OpMode: starts the forwarder and shows the active pipeline and the AprilTags in view. |
 | `FtcRobotController/` | Official Robot Controller application library, resources, and disabled SDK examples. |
 | `gradlew`, `gradlew.bat`, `gradle/` | Gradle 9.1.0 wrapper. |
 
@@ -29,9 +31,12 @@ directory under `TeamCode/src/main/java/org/firstinspires/ftc/teamcode/`, with
 the package `org.firstinspires.ftc.teamcode.teleop`. This folder organization
 preserves the control logic, tuning values, and Driver Station name `TeleOP_v1`.
 
-The `vision/` directory holds `HiveAim.java` (package
-`org.firstinspires.ftc.teamcode.vision`), the math TeleOp uses to aim at a hive.
-It is a helper class, not an OpMode. See [TeleOp hive aiming](#teleop-hive-aiming).
+The `vision/` directory (package `org.firstinspires.ftc.teamcode.vision`) holds the
+Limelight code: `HiveAim.java`, the math TeleOp uses to aim at a hive;
+`LimelightPortForwarder.java`, which lets a laptop reach the Limelight web
+interface; and `LimelightTuning.java`, the `Limelight_tuning` OpMode. See
+[TeleOp hive aiming](#teleop-hive-aiming) and
+[Tune the Limelight from a laptop](#tune-the-limelight-from-a-laptop).
 
 The `auto/` directory contains the Auto program and its tuning helper, using the
 package `org.firstinspires.ftc.teamcode.auto`. The execution files contain control
@@ -124,6 +129,7 @@ Common problems:
 | --- | --- |
 | `command not found: adb` | Check the `~/.zshrc` lines above and reopen VS Code. |
 | `adb devices` shows nothing | Check robot power and use a USB-C cable that carries data, not just charging. |
+| Wi-Fi: `offline`, `failed to connect`, or `Host is down` | The Mac is not on the robot Wi-Fi. The robot network has no internet, so macOS may switch back to another network by itself. Check that `ipconfig getifaddr en0` prints `192.168.43.x`; if it keeps switching, turn off Auto-Join for your other networks in System Settings > Wi-Fi. Then run `adb kill-server` and connect again. |
 | `INSTALL_FAILED_UPDATE_INCOMPATIBLE: signatures do not match` | The hub has an app signed with a different key, such as the factory-installed Robot Controller. Run `adb uninstall com.qualcomm.ftcrobotcontroller` once, then install again. Robot configurations in the hub's `FIRST` folder are kept. Builds from this repository share `libs/ftc.debug.keystore`, so teammates' builds replace each other without this step. |
 | `XXXX-DS does not match YYYY-RC` | The Driver Station and Control Hub names use different team numbers. Our team number is 32898, so the names must be `32898-DS` and `32898-RC`. Rename the wrong device from the Driver Station menu > Settings. |
 | `no voltage sensor` | No hardware configuration is active. Open Configure Robot and activate `2026-27`. |
@@ -193,7 +199,7 @@ The current OpMode preserves the existing Pinpoint pod configuration. If another
 `limelight` is the Limelight 3A camera. These names and device types are recorded
 for the hardware configuration. The current `TeleOP_v1.java` does not control
 `Flywheel`, `elevator`, or `Spoon`. For [hive aiming](#teleop-hive-aiming) it reads
-`limelight` and moves `Camera_angle` to its aim position at START; both are
+`limelight` and holds `Camera_angle` at its aim position from START to STOP; both are
 optional, and TeleOp still runs if either is missing from the configuration.
 Models, hub/port assignments, motor directions and power settings, servo ranges
 and starting positions, and the remaining driver controls have not been specified yet.
@@ -222,14 +228,14 @@ be implemented and tested.
 
 | Input | Action |
 | --- | --- |
-| Gamepad 1 A | Release after starting, then hold to enable PD driving. Releasing stops drive power. |
+| Gamepad 1 right bumper | Release after starting, then hold to enable PD driving. Releasing stops drive power. |
 | Gamepad 1 left stick | Move the virtual translation target using the target heading as the reference. |
 | Gamepad 1 right-stick X | Change the target heading. |
-| Gamepad 1 X / B | Hold to aim at the nearest blue / red hive. Also enables PD like A; the left stick still moves the robot. See [TeleOp hive aiming](#teleop-hive-aiming). |
+| Gamepad 1 X / B | Hold to aim at the nearest blue / red hive. Also enables PD like the right bumper; the left stick still moves the robot. See [TeleOp hive aiming](#teleop-hive-aiming). |
 | Gamepad 2 Y / X / A / B | Select plate targets of 27 / 117 / 207 / 297 degrees. |
 | Gamepad 2 left / right bumper | Run the intake forward / reverse; release to stop. Forward takes priority if both are held. |
 
-These values describe the current code, not a hardware calibration. Tune settings in `Tele_debug_v1.java`. Releasing A resets the translation target and preserves the heading target.
+These values describe the current code, not a hardware calibration. Tune settings in `Tele_debug_v1.java`. Releasing the right bumper resets the translation target and preserves the heading target.
 
 ### TeleOp hive aiming
 
@@ -238,17 +244,18 @@ the nearest red hive. The robot turns until the middle of that hive is straight
 ahead of the Limelight and keeps tracking it while the button is held. Release
 the button to return to normal driving.
 
-- Holding X or B also enables PD driving, like holding A: the robot holds its
-  position and the left stick still moves it, while aiming replaces the right
-  stick. If both buttons are held, blue wins.
+- Holding X or B also enables PD driving, like holding the right bumper: the
+  robot holds its position and the left stick still moves it, while aiming
+  replaces the right stick. If both buttons are held, blue wins.
 - The nearest hive is the one whose visible tags look biggest. The robot stays on
   that hive while the button is held; if it is out of view for more than 0.5 s,
   the nearest visible hive of the same color is chosen instead. Meanwhile the
   robot holds its last aimed heading.
 - Aiming turns at up to TeleOp's normal maximum turn rate, about 110°/s.
-- At START, `Camera_angle` moves to its aim position so the Limelight looks at the
-  tags. Without a `limelight` in the configuration, X and B do nothing and the
-  rest of TeleOp works as before.
+- From START to STOP, TeleOp holds `Camera_angle` at its aim position (1.0) so the
+  Limelight always looks at the tags; it does not move during INIT. Without a
+  `limelight` in the configuration, X and B do nothing and the rest of TeleOp
+  works as before.
 
 #### Hives and their tags
 
@@ -288,17 +295,18 @@ increase from left to right, that view is ignored.
 
 | Setting | Default | Meaning |
 | --- | --- | --- |
-| `DRIVE_ENABLE_BUTTON` | `A` | Gamepad 1 button held to enable PD driving. |
+| `DRIVE_ENABLE_BUTTON` | `RIGHT_BUMPER` | Gamepad 1 button held to enable PD driving. |
 | `AIM_GAMEPAD`, `AIM_BLUE_BUTTON`, `AIM_RED_BUTTON` | `1`, `X`, `B` | Gamepad and buttons that aim at blue and red hives. |
 | `HIVE_TAG_IDS` | the table above | Each hive's tag IDs, left to right. Empty rows are ignored. |
 | `BLUE_HIVES`, `RED_HIVES` | `{1, 2}`, `{3, 4}` | Hive numbers (rows of `HIVE_TAG_IDS`, counting from 1) that each button tracks. |
 | `HIVE_TAG_POSITIONS_CM` | `{-30, -10, 10, 30}` | Tag centers along the row, measured from the middle of the hive; left is negative. Only the relative spacing matters, so the defaults fit four equally spaced tags centered on the hive. |
 | `LIMELIGHT_PIPELINE` | `0` | Limelight pipeline used; pipeline 0 is the AprilTag pipeline. |
+| `LIMELIGHT_PORT_FORWARDING` | `true` | TeleOp INIT starts the Limelight port forwarder; see [Tune the Limelight from a laptop](#tune-the-limelight-from-a-laptop). |
 | `LIMELIGHT_MAX_STALENESS_MS` | `100` | Limelight results older than this are ignored. |
 | `AIM_OFFSET_DEG` | `0` | Moves the aim point; positive aims to the robot's right. Use it if the camera or shooter is off the robot's centerline. |
 | `AIM_TURN_SIGN` | `+1` | Set to `-1` only if aiming turns the robot away from the hive. |
 | `AIM_LOST_MS` | `500` | How long the chosen hive may be out of view before another is chosen. |
-| `AIM_CAMERA_ANGLE_POSITION` | `1.0` | `Camera_angle` servo position set at START. |
+| `AIM_CAMERA_ANGLE_POSITION` | `1.0` | `Camera_angle` servo position, held on every TeleOp loop from START to STOP. |
 
 #### Aiming telemetry
 
@@ -322,6 +330,40 @@ increase from left to right, that view is ignored.
    settles to one side of the middle, adjust `AIM_OFFSET_DEG`.
 4. After editing `Tele_debug_v1.java`, save the file before building, because the
    build uses only saved files. Then rebuild and install.
+
+### Tune the Limelight from a laptop
+
+The Limelight 3A is plugged into the Control Hub's USB port, where only the hub can
+reach it (at `172.29.0.1`). `vision/LimelightPortForwarder.java` runs on the
+Control Hub and passes ports 5800-5809 (camera stream, web interface, and live
+data) through to the Limelight, so a laptop on the robot Wi-Fi can open the
+Limelight web interface and tune pipelines without unplugging anything.
+
+1. Start either OpMode:
+   - `TeleOP_v1`: INIT starts forwarding while `LIMELIGHT_PORT_FORWARDING` is
+     `true`, so you can tune while driving and aiming. Its INIT screen shows
+     `Limelight web: http://192.168.43.1:5801 (10 of 10 ports)`.
+   - `Limelight_tuning` (TeleOp list, Tuning group): INIT starts forwarding and
+     shows the active pipeline and every AprilTag in view, left to right, with its
+     hive number, `tx`, `ty`, and area. It never drives the robot; after START it
+     holds `Camera_angle` at the TeleOp aim position so the camera sees what
+     TeleOp sees.
+2. Join the laptop to the robot Wi-Fi (`32898-RC`) and open
+   **http://192.168.43.1:5801** in a browser.
+3. Tune **pipeline 0**, the AprilTag pipeline that TeleOp switches to
+   (`LIMELIGHT_PIPELINE`). The settings are stored on the Limelight, so no
+   rebuild is needed.
+
+Forwarding keeps running after the OpMode stops, until the Robot Controller app
+restarts. It is only for tuning; OpModes use the Limelight without it. Set
+`LIMELIGHT_PORT_FORWARDING = false` in `Tele_debug_v1.java` to keep TeleOp from
+starting it, for example at competitions.
+
+| Problem | Fix |
+| --- | --- |
+| The page does not load | Check that the laptop is still on `32898-RC` (macOS may switch back to a network with internet) and that the Driver Station shows `10 of 10 ports`. |
+| `Limelight connected: false`, or no `limelight` in the configuration | Check the Limelight's USB cable and that the active configuration has a Limelight 3A named `limelight`. |
+| The Limelight is connected but the page still does not load | The Limelight may use a different address; change `LIMELIGHT_ADDRESS` in `LimelightPortForwarder.java`. |
 
 ## Work with the team
 
@@ -366,3 +408,5 @@ Use the current official manual and team updates when making game-specific decis
 - GitHub Actions APK build: [passed for commit `ec9cf0c`](https://github.com/Leogao07/Via_veritas_voltage_26-27/actions/runs/39948262006).
 - Robot testing: not performed as part of repository setup.
 - TeleOp hive aiming: blue and red hive tracking tested on the robot on October 30, 2026.
+- Right bumper drive enable, `Camera_angle` hold, and Limelight web tuning through
+  the Control Hub: tested on the robot on November 2, 2026.

@@ -13,18 +13,20 @@ import com.qualcomm.robotcore.hardware.PwmControl;
 import org.firstinspires.ftc.robotcore.external.navigation.AngleUnit;
 import org.firstinspires.ftc.robotcore.external.navigation.DistanceUnit;
 import org.firstinspires.ftc.teamcode.vision.HiveAim;
+import org.firstinspires.ftc.teamcode.vision.LimelightPortForwarder;
 
 /**
  * GAMEPAD -> VIRTUAL TARGET POSE -> PD CONTROLLER -> YOUR ORIGINAL WHEEL MIXER
  *
  * The sticks change targetX, targetY, and targetHeading, not motor power.
  * Odometry measures the real pose. PD feedback makes the robot follow the target.
- * With centered sticks and gamepad 1 A held, the robot holds the last target.
- * Release A to stop applying power and reset only the X/Y target.
+ * With centered sticks and the gamepad 1 right bumper held, the robot holds the
+ * last target. Release it to stop applying power and reset only the X/Y target.
  * Target heading starts at 0 degrees on INIT. ONLY right-stick X changes it, or
  * holding an aim button (gamepad 1 X: blue hives, B: red hives), which turns it
- * toward that alliance's nearest hive seen by the Limelight and enables PD like A.
- * Translating, releasing A, and actual heading drift never change it.
+ * toward that alliance's nearest hive seen by the Limelight and also enables PD.
+ * Translating, releasing the right bumper, and actual heading drift never change it.
+ * From START to STOP, Camera_angle is held at AIM_CAMERA_ANGLE_POSITION.
  *
  * Original hardware names are retained; joystick spelling is corrected.
  * Plate presets and intake controls are configured in Tele_debug_v1.java.
@@ -136,6 +138,8 @@ public class TeleOP_v1 extends LinearOpMode {
             // The Limelight and camera servo are optional here: without them the
             // aim button does nothing and the rest of TeleOp works as before.
             limelight = hardwareMap.tryGet(Limelight3A.class, "limelight");
+            // Lets a laptop on the robot Wi-Fi tune pipelines; harmless if already running.
+            if (Tele_debug_v1.LIMELIGHT_PORT_FORWARDING) LimelightPortForwarder.start();
             if (limelight != null) {
                 limelight.pipelineSwitch(Tele_debug_v1.LIMELIGHT_PIPELINE);
                 limelight.start();
@@ -158,6 +162,10 @@ public class TeleOP_v1 extends LinearOpMode {
                 // Shows which hive tags are visible so their order can be checked.
                 updateAim(odometry.getHeading(AngleUnit.RADIANS), null);
                 reportAim();
+                if (Tele_debug_v1.LIMELIGHT_PORT_FORWARDING) {
+                    telemetry.addData("Limelight web", "http://192.168.43.1:5801 (%d of %d ports)",
+                            LimelightPortForwarder.listeningPorts(), LimelightPortForwarder.portCount());
+                }
                 Tele_debug_v1.reportInit(telemetry, odometry.getDeviceStatus(),
                         odometry.getPosX(DistanceUnit.CM), odometry.getPosY(DistanceUnit.CM),
                         odometry.getHeading(AngleUnit.DEGREES));
@@ -165,8 +173,6 @@ public class TeleOP_v1 extends LinearOpMode {
             }
             waitForStart();
             if (isStopRequested()) return;
-            // Tilt the Limelight toward the hive tags; no servo moves during INIT.
-            if (cameraAngle != null) cameraAngle.setPosition(Tele_debug_v1.AIM_CAMERA_ANGLE_POSITION);
 
             long previousTime = System.nanoTime();
             boolean tracking = false;
@@ -174,6 +180,10 @@ public class TeleOP_v1 extends LinearOpMode {
             String fault = "";
 
             while (opModeIsActive()) {
+                // Keep the Limelight tilted toward the hive tags for all of TeleOp,
+                // even while driving is disabled. No servo moves during INIT.
+                if (cameraAngle != null) cameraAngle.setPosition(Tele_debug_v1.AIM_CAMERA_ANGLE_POSITION);
+
                 // Always read the complete odometry pose BEFORE computing power.
                 odometry.update();
                 double x = odometry.getPosX(DistanceUnit.CM);
